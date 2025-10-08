@@ -38,6 +38,7 @@
 .comments-list.parent {
   display: flex;
   flex-direction: column-reverse;
+  width: calc(100% + 12px);
 }
 
 /* ========================================
