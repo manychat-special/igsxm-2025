@@ -1,121 +1,140 @@
-#sorter, .comment-replied-to, .main-box-footer, .comments-top, .main-box-header-wrap {
-display: none;
-}
+/* ========================================
+   HIDDEN ELEMENTS
+   ======================================== */
 
-#comments {
-margin-top: 0px;
+#sorter, .comment-replied-to, .main-box-footer, .comments-top, .main-box-header-wrap {
+  display: none;
 }
 
 .comment-buttons .writer-buttons {
-display: none;
+  display: none;
 }
 
-.comments-wrap {
-display: flex;
-flex-direction: column-reverse;
-
+.user-profile-popup-wrap .section-wrap, .user-profile-popup-wrap .section-selector {
+  display: none;
 }
 
-.comment-replied-to {
-padding: 4px 8px;
-border-radius: 0px;
-}
-.comments-list {
-width: 100%
-}
+/* ========================================
+   MAIN LAYOUT & STRUCTURE
+   ======================================== */
 
-.comments-list.parent {
-display: flex;
-flex-direction: column-reverse;
-}
-
-.editor-wrap {
-position: sticky;
-bottom: 0;
-z-index: 100;
-padding-top: 16px;
-background: linear-gradient(to top, 
-  white 0%, 
-  rgba(255, 255, 255, 0.987) 8.1%, 
-  rgba(255, 255, 255, 0.951) 15.5%, 
-  rgba(255, 255, 255, 0.896) 22.5%, 
-  rgba(255, 255, 255, 0.825) 29%, 
-  rgba(255, 255, 255, 0.741) 35.3%, 
-  rgba(255, 255, 255, 0.648) 41.2%, 
-  rgba(255, 255, 255, 0.550) 47.1%, 
-  rgba(255, 255, 255, 0.450) 52.9%, 
-  rgba(255, 255, 255, 0.352) 58.8%, 
-  rgba(255, 255, 255, 0.259) 64.7%, 
-  rgba(255, 255, 255, 0.104) 77.5%, 
-  rgba(255, 255, 255, 0.049) 84.5%, 
-  rgba(255, 255, 255, 0) 100%);
-
-}
-.comment-buttons {
-    position: absolute;
-    top: 0;
-    right: 0;
-padding: 10px;
-font-size: 1em;
+#comments {
+  margin-top: 0px;
 }
 
 .main-box {
-margin: 0px;
+  margin: 0px;
 }
 
-
-.user-profile-popup-wrap .section-wrap, .user-profile-popup-wrap .section-selector {
-display: none;
+.comments-wrap {
+  display: flex;
+  flex-direction: column-reverse;
 }
 
-.user-profile-popup-wrap .popup-content {
-height: auto;
+.comments-list {
+  width: 100%;
 }
 
-.user-profile-popup-wrap .user-profile-inner {
-margin: 0;
+.comments-list.parent {
+  display: flex;
+  flex-direction: column-reverse;
 }
 
-.rich-editor.focused .comment-writer .ProseMirror {
-min-height: auto;
-}
+/* ========================================
+   COMMENT EDITOR & INPUT
+   ======================================== */
 
-.ProseMirror {
-border-radius: 16px;
-padding: 16px;
-}
-
-.comments-list parent{
-width: 100%
+.editor-wrap {
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+  padding-top: 16px;
+  background: linear-gradient(to top, 
+    white 0%, 
+    rgba(255, 255, 255, 0.987) 8.1%, 
+    rgba(255, 255, 255, 0.951) 15.5%, 
+    rgba(255, 255, 255, 0.896) 22.5%, 
+    rgba(255, 255, 255, 0.825) 29%, 
+    rgba(255, 255, 255, 0.741) 35.3%, 
+    rgba(255, 255, 255, 0.648) 41.2%, 
+    rgba(255, 255, 255, 0.550) 47.1%, 
+    rgba(255, 255, 255, 0.450) 52.9%, 
+    rgba(255, 255, 255, 0.352) 58.8%, 
+    rgba(255, 255, 255, 0.259) 64.7%, 
+    rgba(255, 255, 255, 0.104) 77.5%, 
+    rgba(255, 255, 255, 0.049) 84.5%, 
+    rgba(255, 255, 255, 0) 100%);
 }
 
 .comment-writer {
-box-shadow: 0 0 0 1px var(--ht-color-accent-35);
-margin-right: 1px;
-margin-bottom: 1px;
-border-radius: 16px;
+  box-shadow: 0 0 0 1px var(--ht-color-accent-35);
+  margin-right: 1px;
+  margin-bottom: 1px;
+  border-radius: 16px;
+}
+
+.rich-editor.focused .comment-writer .ProseMirror {
+  min-height: auto;
+}
+
+.ProseMirror {
+  border-radius: 16px;
+  padding: 16px;
+}
+
+/* ========================================
+   COMMENT BUTTONS & ACTIONS
+   ======================================== */
+
+.comment-buttons {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 10px;
+  font-size: 1em;
 }
 
 .global-button.normal {
-width: 32px;
-height: 32px;
-padding: 8px;
-border-radius: 1000px;
-font-size: 1em;
+  width: 32px;
+  height: 32px;
+  padding: 8px;
+  border-radius: 1000px;
+  font-size: 1em;
+}
+
+/* ========================================
+   USER PROFILE & METADATA
+   ======================================== */
+
+.user-profile-popup-wrap .popup-content {
+  height: auto;
+}
+
+.user-profile-popup-wrap .user-profile-inner {
+  margin: 0;
 }
 
 .user-profile-popup-wrap .profile-right .name {
-font-size: 1.5em;
+  font-size: 1.5em;
 }
 
 .user-badge, .comment-user-name, .comment-time {
-margin-inline-end: 6px;
+  margin-inline-end: 6px;
 }
 
 .comment-meta-left {
-flex-wrap: wrap;
+  flex-wrap: wrap;
 }
 
 .comment-time {
-margin: 0;
+  margin: 0;
+}
+
+/* ========================================
+   MISC STYLES
+   ======================================== */
+
+.comment-replied-to {
+  padding: 4px 8px;
+  border-radius: 0px;
 }
