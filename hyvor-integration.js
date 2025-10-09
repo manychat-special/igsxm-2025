@@ -23,6 +23,12 @@ window.$memberstackDom.getCurrentMember().then(async ({ data }) => {
     }
     
     comments.setAttribute('page-id', pageId);
+    
+    // Set theme/colors from container data attribute
+    if (container && container.dataset.theme) {
+        comments.setAttribute('colors', container.dataset.theme);
+    }
+    
     comments.setAttribute('t-comment-button-text', '↑');
     comments.setAttribute('t-reply-button-text', '↑');
     comments.setAttribute('t-ago-seconds', '* s');
