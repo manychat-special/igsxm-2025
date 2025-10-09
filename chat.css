@@ -165,13 +165,15 @@
   margin: 0;
 }
 
-.mention-suggestions {
+.mention-suggestions.active {
   position: static;
   max-height: 8rem !important;
+  display: flex;
+  flex-direction: column;
 }
 
 .mention-suggestions {
-  display: flex;
+  display: none;
   flex-direction: column;
 }
 
