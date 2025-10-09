@@ -117,6 +117,11 @@
    USER PROFILE & METADATA
    ======================================== */
 
+
+.user-profile-popup-wrap {
+  padding: 24px;
+}
+
 .user-profile-popup-wrap .popup-content {
   height: auto;
   border-radius: 24px;
@@ -125,6 +130,10 @@
 .user-profile-popup-wrap .user-profile-inner {
   margin: 0;
   flex-wrap: wrap;
+}
+
+.user-profile-popup-wrap .profile-right {
+  margin-inline-start: 0px;
 }
 
 .user-profile-popup-wrap .profile-right .name {
