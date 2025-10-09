@@ -161,6 +161,17 @@
   margin: 0;
 }
 
+..mention-suggestions {
+  position: static;
+  max-height: 8rem !important;
+}
+
+.mention-suggestions {
+  display: flex;
+  flex-direction: column;
+}
+
+
 /* ========================================
    MISC STYLES
    ======================================== */
