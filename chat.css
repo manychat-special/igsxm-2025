@@ -149,7 +149,9 @@
   align-items: start;
 }
 
-.comment-tag {
+.comment-tag, .user-badge {
+  font-family: 'CoFo Sans Mono';
+  font-weight: normal;
   font-size: .7em;
   padding: 2px 6px;
 }
