@@ -12,6 +12,9 @@ window.$memberstackDom.getCurrentMember().then(async ({ data }) => {
     comments.setAttribute('t-ago-days', '* d');
     comments.setAttribute('t-ago-day', '1 d');
     comments.setAttribute('t-just-now', 'now');
+    comments.setAttribute('t-featured', '⭐');
+    comments.setAttribute('t-loved-by', '❤️');
+    comments.setAttribute('t-edit', '↑');
     
     if (data) {
       const email = data.auth.email;
@@ -21,7 +24,7 @@ window.$memberstackDom.getCurrentMember().then(async ({ data }) => {
       
       if (data.customFields) {
         const firstName = data.customFields['first-name'] || data.customFields['firstName'] || '';
-        const lastName = data.customField- s['last-name'] || data.customFields['lastName'] || '';
+        const lastName = data.customFields['last-name'] || data.customFields['lastName'] || '';
         
         if (firstName || lastName) {
           userName = `${firstName} ${lastName}`.trim();
@@ -36,6 +39,27 @@ window.$memberstackDom.getCurrentMember().then(async ({ data }) => {
       // Get bio from custom fields
       let userBio = (data.customFields && data.customFields.bio) || null;
       
+      // Build website URL from Instagram handle
+      let websiteUrl = null;
+      if (data.customFields && data.customFields.ighandle) {
+        let handle = data.customFields.ighandle.trim();
+        
+        // Clean up the handle
+        handle = handle.replace(/^@/, ''); // Remove @ if present at start
+        handle = handle.replace(/\s+/g, ''); // Remove spaces
+        handle = handle.replace(/[^a-zA-Z0-9._]/g, ''); // Keep only valid Instagram characters
+        
+        // Only create URL if handle has content after cleaning
+        if (handle.length > 0) {
+          // Check if it already includes instagram.com
+          if (handle.includes('instagram.com')) {
+            handle = handle.split('instagram.com/').pop();
+          }
+          
+          websiteUrl = `https://instagram.com/${handle}`;
+        }
+      }
+      
       // Create user object
       const ssoUser = {
         timestamp: Math.floor(Date.now() / 1000),
@@ -43,7 +67,8 @@ window.$memberstackDom.getCurrentMember().then(async ({ data }) => {
         name: userName,
         email: email,
         picture_url: avatarUrl,
-        bio: userBio
+        bio: userBio,
+        website_url: websiteUrl
       };
       
       // Properly encode to handle special characters
