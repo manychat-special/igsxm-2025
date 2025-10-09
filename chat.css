@@ -144,8 +144,14 @@
   margin-inline-end: 6px;
 }
 
-.comment-meta-left {
+.comment-meta-left, .comment-meta {
   flex-wrap: wrap;
+  align-items: start;
+}
+
+.comment-tag {
+  font-size: .7em;
+  padding: 2px 6px;
 }
 
 .comment-time {
