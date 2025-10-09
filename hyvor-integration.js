@@ -1,6 +1,28 @@
 window.$memberstackDom.getCurrentMember().then(async ({ data }) => {
     const comments = document.createElement('hyvor-talk-comments');
     comments.setAttribute('website-id', 14188);
+    
+    // Set page-id from various sources
+    let pageId = null;
+    
+    // 1. Check for data attribute on the container
+    const container = document.getElementById("chat_embed");
+    if (container && container.dataset.pageId) {
+        pageId = container.dataset.pageId;
+    }
+    
+    // 2. Check for data attribute on the script tag
+    const scriptTag = document.querySelector('script[src*="hyvor-integration.js"]');
+    if (scriptTag && scriptTag.dataset.pageId) {
+        pageId = scriptTag.dataset.pageId;
+    }
+    
+    // 3. Use current page URL as fallback
+    if (!pageId) {
+        pageId = window.location.pathname + window.location.search;
+    }
+    
+    comments.setAttribute('page-id', pageId);
     comments.setAttribute('t-comment-button-text', '↑');
     comments.setAttribute('t-reply-button-text', '↑');
     comments.setAttribute('t-ago-seconds', '* s');
