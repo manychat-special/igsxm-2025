@@ -157,6 +157,10 @@
   padding: 2px 6px;
 }
 
+.comment-tag.loved .icon {
+  display: none;
+}
+
 .comment-time {
   margin: 0;
 }
