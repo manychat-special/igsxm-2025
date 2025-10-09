@@ -119,10 +119,12 @@
 
 .user-profile-popup-wrap .popup-content {
   height: auto;
+  border-radius: 24px;
 }
 
 .user-profile-popup-wrap .user-profile-inner {
   margin: 0;
+  flex-wrap: wrap;
 }
 
 .user-profile-popup-wrap .profile-right .name {
