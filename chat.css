@@ -77,6 +77,25 @@
     rgba(255, 255, 255, 0) 100%);
 }
 
+/* Dark theme editor wrap */
+#app.light .editor-wrap {
+  background: linear-gradient(to top, 
+    black 0%, 
+    rgba(0, 0, 0, 0.987) 8.1%, 
+    rgba(0, 0, 0, 0.951) 15.5%, 
+    rgba(0, 0, 0, 0.896) 22.5%, 
+    rgba(0, 0, 0, 0.825) 29%, 
+    rgba(0, 0, 0, 0.741) 35.3%, 
+    rgba(0, 0, 0, 0.648) 41.2%, 
+    rgba(0, 0, 0, 0.550) 47.1%, 
+    rgba(0, 0, 0, 0.450) 52.9%, 
+    rgba(0, 0, 0, 0.352) 58.8%, 
+    rgba(0, 0, 0, 0.259) 64.7%, 
+    rgba(0, 0, 0, 0.104) 77.5%, 
+    rgba(0, 0, 0, 0.049) 84.5%, 
+    rgba(0, 0, 0, 0) 100%);
+}
+
 .comment-writer {
   box-shadow: 0 0 0 1px var(--ht-color-accent-35);
   margin-right: 1px;
