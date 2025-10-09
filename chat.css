@@ -61,6 +61,10 @@
   z-index: 100;
   padding-top: 16px;
   background: linear-gradient(to top, 
+  var(--ht-color-box) 0%, 
+  rgba(255, 255, 255, 0) 100%);
+
+ /* background: linear-gradient(to top, 
     white 0%, 
     rgba(255, 255, 255, 0.987) 8.1%, 
     rgba(255, 255, 255, 0.951) 15.5%, 
@@ -75,7 +79,7 @@
     rgba(255, 255, 255, 0.104) 77.5%, 
     rgba(255, 255, 255, 0.049) 84.5%, 
     rgba(255, 255, 255, 0) 100%);
-}
+} */
 
 .comment-writer {
   box-shadow: 0 0 0 1px var(--ht-color-accent-35);
