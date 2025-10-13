@@ -102,13 +102,12 @@ class SessionVisibilityManager {
     }
     
     filterNestedSessions(collectionList, childSessions, parentSession) {
-        const now = new Date();
         const parentStartTime = parentSession.startTime.getTime();
         const parentEndTime = parentSession.endTime.getTime();
         
         // Show sessions that are:
         // 1. Running simultaneously (overlapping with parent session)
-        // 2. Starting soon after parent session (within 30 minutes)
+        // 2. Starting after parent session (within 30 minutes)
         const relevantSessions = [];
         
         childSessions.forEach(childElement => {
@@ -119,11 +118,11 @@ class SessionVisibilityManager {
                 const childStartTime = new Date(startTime).getTime();
                 const childEndTime = new Date(endTime).getTime();
                 
-                // Check if session is relevant
+                // Check if session is relevant (only compare with parent session)
                 const isSimultaneous = (childStartTime <= parentEndTime && childEndTime >= parentStartTime);
-                const startsSoonAfter = (childStartTime > parentEndTime && childStartTime <= parentEndTime + (30 * 60 * 1000)); // 30 minutes
+                const startsAfter = (childStartTime >= parentStartTime && childStartTime <= parentEndTime + (30 * 60 * 1000)); // 30 minutes after parent ends
                 
-                if (isSimultaneous || startsSoonAfter) {
+                if (isSimultaneous || startsAfter) {
                     relevantSessions.push(childElement);
                 } else {
                     childElement.style.display = 'none';
