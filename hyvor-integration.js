@@ -40,7 +40,7 @@ window.$memberstackDom.getCurrentMember().then(async ({ data }) => {
     comments.setAttribute('t-ago-days', '* d');
     comments.setAttribute('t-ago-day', '1 d');
     comments.setAttribute('t-just-now', 'now');
-    comments.setAttribute('t-featured', '⭐');
+    comments.setAttribute('t-featured', '📍');
     comments.setAttribute('t-loved-by', '❤️');
     comments.setAttribute('t-edit', '↑');
     
