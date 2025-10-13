@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session Visibility Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .session-item {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            background: #f9f9f9;
+        }
+        
+        .session-before {
+            border-color: #ffa500;
+            background: #fff8e1;
+        }
+        
+        .session-during {
+            border-color: #4caf50;
+            background: #e8f5e8;
+        }
+        
+        .session-after {
+            border-color: #9e9e9e;
+            background: #f5f5f5;
+        }
+        
+        .countdown {
+            font-weight: bold;
+            color: #ff6b35;
+            font-size: 1.2em;
+        }
+        
+        .live-indicator {
+            color: #4caf50;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .session-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .session-time {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .session-content {
+            margin-top: 15px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Live Event Session Management Example</h1>
+    
+    <!-- Session 1: Starting in 2 minutes -->
+    <div class="session-item" 
+         data-agenda-item 
+         data-start-time="2024-01-15T10:02:00Z" 
+         data-end-time="2024-01-15T10:32:00Z">
+        
+        <div class="session-title">Opening Keynote</div>
+        <div class="session-time">10:02 - 10:32 UTC</div>
+        
+        <!-- Before session starts -->
+        <div data-before-session class="session-content">
+            <p>Session starting soon!</p>
+            <div class="countdown" data-countdown>Loading...</div>
+            <p>Get ready for an amazing opening keynote presentation.</p>
+        </div>
+        
+        <!-- During live session -->
+        <div data-during-session class="session-content hidden">
+            <div class="live-indicator">🔴 LIVE</div>
+            <p>Welcome to the opening keynote! The session is now live.</p>
+            <p>Join the discussion and ask questions in the chat.</p>
+        </div>
+        
+        <!-- After session ends -->
+        <div data-after-session class="session-content hidden">
+            <p>This session has ended. Thank you for attending!</p>
+            <p>Check out the recording and additional resources below.</p>
+        </div>
+    </div>
+    
+    <!-- Session 2: Starting in 5 minutes -->
+    <div class="session-item" 
+         data-agenda-item 
+         data-start-time="2024-01-15T10:05:00Z" 
+         data-end-time="2024-01-15T10:35:00Z">
+        
+        <div class="session-title">Panel Discussion</div>
+        <div class="session-time">10:05 - 10:35 UTC</div>
+        
+        <!-- Before session starts -->
+        <div data-before-session class="session-content">
+            <p>Panel discussion starting soon!</p>
+            <div class="countdown" data-countdown>Loading...</div>
+            <p>Our expert panel will discuss the latest industry trends.</p>
+        </div>
+        
+        <!-- During live session -->
+        <div data-during-session class="session-content hidden">
+            <div class="live-indicator">🔴 LIVE</div>
+            <p>The panel discussion is now live!</p>
+            <p>Submit your questions and participate in the conversation.</p>
+        </div>
+        
+        <!-- After session ends -->
+        <div data-after-session class="session-content hidden">
+            <p>Panel discussion has concluded.</p>
+            <p>Thank you to our panelists and all participants!</p>
+        </div>
+    </div>
+    
+    <!-- Session 3: Already ended (for testing) -->
+    <div class="session-item" 
+         data-agenda-item 
+         data-start-time="2024-01-15T09:00:00Z" 
+         data-end-time="2024-01-15T09:30:00Z">
+        
+        <div class="session-title">Pre-Event Session</div>
+        <div class="session-time">09:00 - 09:30 UTC</div>
+        
+        <!-- Before session starts -->
+        <div data-before-session class="session-content hidden">
+            <p>This session has already started!</p>
+        </div>
+        
+        <!-- During live session -->
+        <div data-during-session class="session-content hidden">
+            <div class="live-indicator">🔴 LIVE</div>
+            <p>This session is live!</p>
+        </div>
+        
+        <!-- After session ends -->
+        <div data-after-session class="session-content">
+            <p>This session has ended.</p>
+            <p>You can access the recording and materials in your dashboard.</p>
+        </div>
+    </div>
+    
+    <script src="session-visibility.js"></script>
+    
+    <script>
+        // Example of how to use the session manager programmatically
+        setTimeout(() => {
+            console.log('Current session states:');
+            document.querySelectorAll('[data-agenda-item]').forEach(session => {
+                const state = window.sessionManager.getCurrentState(session);
+                console.log(`Session: ${session.querySelector('.session-title').textContent}, State: ${state}`);
+            });
+        }, 2000);
+    </script>
+</body>
+</html>
