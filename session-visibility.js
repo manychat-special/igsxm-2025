@@ -107,7 +107,7 @@ class SessionVisibilityManager {
         
         // Show sessions that are:
         // 1. Simultaneous (running at the same time as parent)
-        // 2. Starting exactly when parent session ends
+        // 2. Starting after parent session ends (within 30 minutes)
         const relevantSessions = [];
         
         childSessions.forEach(childElement => {
@@ -120,9 +120,14 @@ class SessionVisibilityManager {
                 
                 // Check if session is relevant
                 const isSimultaneous = (childStartTime < parentEndTime && childEndTime > parentStartTime);
-                const startsExactlyAfter = (childStartTime === parentEndTime);
+                const startsAfterWithBuffer = (childStartTime >= parentEndTime && childStartTime <= parentEndTime + (30 * 60 * 1000)); // 30 minutes buffer
                 
-                if (isSimultaneous || startsExactlyAfter) {
+                // Debug logging
+                console.log(`Parent: ${new Date(parentStartTime).toLocaleTimeString()} - ${new Date(parentEndTime).toLocaleTimeString()}`);
+                console.log(`Child: ${new Date(childStartTime).toLocaleTimeString()} - ${new Date(childEndTime).toLocaleTimeString()}`);
+                console.log(`Simultaneous: ${isSimultaneous}, Starts after (30min buffer): ${startsAfterWithBuffer}`);
+                
+                if (isSimultaneous || startsAfterWithBuffer) {
                     relevantSessions.push(childElement);
                 } else {
                     childElement.style.display = 'none';
