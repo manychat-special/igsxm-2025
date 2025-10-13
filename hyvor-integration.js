@@ -67,24 +67,33 @@ window.$memberstackDom.getCurrentMember().then(async ({ data }) => {
       // Get bio from custom fields
       let userBio = (data.customFields && data.customFields.bio) || null;
       
-      // Build website URL from Instagram handle
+      // Build website URL from Instagram handle/link
       let websiteUrl = null;
       if (data.customFields && data.customFields.ighandle) {
-        let handle = data.customFields.ighandle.trim();
+        let input = data.customFields.ighandle.trim();
         
-        // Clean up the handle
-        handle = handle.replace(/^@/, ''); // Remove @ if present at start
-        handle = handle.replace(/\s+/g, ''); // Remove spaces
-        handle = handle.replace(/[^a-zA-Z0-9._]/g, ''); // Keep only valid Instagram characters
+        // Extract handle from various input formats
+        let handle = null;
         
-        // Only create URL if handle has content after cleaning
-        if (handle.length > 0) {
-          // Check if it already includes instagram.com
-          if (handle.includes('instagram.com')) {
-            handle = handle.split('instagram.com/').pop();
-          }
+        // Handle full Instagram URLs
+        const igUrlPattern = /(?:https?:\/\/)?(?:www\.)?instagram\.com\/([a-zA-Z0-9._]+)/i;
+        const urlMatch = input.match(igUrlPattern);
+        if (urlMatch) {
+          handle = urlMatch[1];
+        } else {
+          // Handle @handle or just handle format
+          handle = input.replace(/^@/, '').replace(/\s+/g, '');
+        }
+        
+        // Clean and validate handle
+        if (handle) {
+          // Remove any remaining invalid characters
+          handle = handle.replace(/[^a-zA-Z0-9._]/g, '');
           
-          websiteUrl = `https://instagram.com/${handle}`;
+          // Only create URL if handle is valid and not empty
+          if (handle.length > 0 && handle.length <= 30) { // Instagram handles are max 30 chars
+            websiteUrl = `https://instagram.com/${handle}`;
+          }
         }
       }
       
