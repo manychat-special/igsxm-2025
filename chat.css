@@ -165,6 +165,14 @@
   display: none;
 }
 
+.comment-tag.featured {
+  background-color: var(#ffffff14);
+}
+
+.comment.featured>.comment-inside {
+  background-color: var(#ffffff17);
+}
+
 .comment-time {
   margin: 0;
 }
