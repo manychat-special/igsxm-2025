@@ -68,6 +68,12 @@
             margin-top: 15px;
         }
         
+        .countdown-display {
+            font-weight: bold;
+            color: #ff6b35;
+            margin-bottom: 10px;
+        }
+        
         .hidden {
             display: none;
         }
@@ -78,12 +84,13 @@
     
     <!-- Session 1: Starting in 2 minutes -->
     <div class="session-item" 
-         data-agenda-item 
+         data-agenda-item
          data-start-time="2024-01-15T10:02:00Z" 
          data-end-time="2024-01-15T10:32:00Z">
         
         <div class="session-title">Opening Keynote</div>
         <div class="session-time">10:02 - 10:32 UTC</div>
+        <div class="countdown-display">Starts in: <span data-session-countdown>Loading...</span></div>
         
         <!-- Before session starts -->
         <div data-before-session class="session-content">
@@ -108,12 +115,13 @@
     
     <!-- Session 2: Starting in 5 minutes -->
     <div class="session-item" 
-         data-agenda-item 
+         data-agenda-item
          data-start-time="2024-01-15T10:05:00Z" 
          data-end-time="2024-01-15T10:35:00Z">
         
         <div class="session-title">Panel Discussion</div>
         <div class="session-time">10:05 - 10:35 UTC</div>
+        <div class="countdown-display">Starts in: <span data-session-countdown>Loading...</span></div>
         
         <!-- Before session starts -->
         <div data-before-session class="session-content">

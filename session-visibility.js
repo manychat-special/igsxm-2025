@@ -32,6 +32,35 @@ class SessionVisibilityManager {
         });
     }
     
+    updateCountdownTimers() {
+        this.sessions.forEach(session => {
+            const countdownElements = session.element.querySelectorAll('[data-session-countdown]');
+            
+            countdownElements.forEach(element => {
+                const now = new Date();
+                const timeDiff = session.startTime.getTime() - now.getTime();
+                
+                if (timeDiff > 0) {
+                    const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+                    
+                    // Format: days .. hours minutes
+                    let countdownText = '';
+                    if (days > 0) {
+                        countdownText = `${days} : ${hours} : ${minutes}`;
+                    } else {
+                        countdownText = `${hours} : ${minutes}`;
+                    }
+                    
+                    element.textContent = countdownText;
+                } else {
+                    element.textContent = '0 .. 0 0'; // Session has started
+                }
+            });
+        });
+    }
+    
     findSessions() {
         const sessionElements = document.querySelectorAll('[data-agenda-item]');
         
@@ -135,6 +164,7 @@ class SessionVisibilityManager {
         this.sessions.forEach(session => {
             this.updateSessionVisibility(session);
         });
+        this.updateCountdownTimers();
     }
     
     startPeriodicUpdates() {
@@ -146,6 +176,7 @@ class SessionVisibilityManager {
                     this.updateCountdown(session.element, session.startTime);
                 }
             });
+            this.updateCountdownTimers();
         }, 1000);
         
         // Check for state changes every 30 seconds
