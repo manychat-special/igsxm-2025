@@ -103,6 +103,10 @@
   padding: 16px 38px 16px 16px
 }
 
+.comment-content x-mention, .ProseMirror x-mention {
+background-color: var(--ht-color-accent-15);
+}
+
 /* ========================================
    COMMENT BUTTONS & ACTIONS
    ======================================== */

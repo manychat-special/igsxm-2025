@@ -87,16 +87,25 @@ class SessionVisibilityManager {
     
     findNestedCollections() {
         const collectionLists = document.querySelectorAll('[data-agenda-next]');
+        console.log(`Found ${collectionLists.length} nested collections`);
         
-        collectionLists.forEach(collectionList => {
+        collectionLists.forEach((collectionList, index) => {
             const parentSessionId = collectionList.getAttribute('data-agenda-next');
+            console.log(`Collection ${index}: Looking for parent session with ID: "${parentSessionId}"`);
+            
             const parentSession = this.sessions.find(s => 
                 s.element.getAttribute('data-agenda-item') === parentSessionId
             );
             
+            console.log(`Available sessions:`, this.sessions.map(s => s.element.getAttribute('data-agenda-item')));
+            
             if (parentSession) {
+                console.log(`Found parent session: ${parentSessionId}`);
                 const childSessions = collectionList.querySelectorAll('[data-agenda-item]');
+                console.log(`Found ${childSessions.length} child sessions in collection`);
                 this.filterNestedSessions(collectionList, childSessions, parentSession);
+            } else {
+                console.log(`Parent session not found: ${parentSessionId}`);
             }
         });
     }
