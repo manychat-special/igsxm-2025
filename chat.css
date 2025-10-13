@@ -32,7 +32,12 @@
 }
 
 .comment .comment-inside {
-  padding: 12px 0px 12px 12px;
+  padding: 6px 0px 6px 12px;
+  font-size: 0.9em;
+}
+
+.comment-content {
+  margin: 5px 0 8px;
 }
 
 .comments-list {
@@ -142,6 +147,10 @@
 
 .user-profile-popup-wrap .profile-right .name {
   font-size: 1.5em;
+}
+
+.user-badge {
+  margin-inline-start: 0px;
 }
 
 .user-badge, .comment-user-name, .comment-time {
