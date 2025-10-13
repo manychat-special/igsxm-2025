@@ -45,17 +45,21 @@ class SessionVisibilityManager {
                     const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                     const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
                     
-                    // Format: days .. hours minutes
+                    // Show only one unit - most relevant
                     let countdownText = '';
                     if (days > 0) {
-                        countdownText = `${days} : ${hours} : ${minutes}`;
+                        countdownText = `${days} day${days > 1 ? 's' : ''}`;
+                    } else if (hours > 0) {
+                        countdownText = `${hours} hour${hours > 1 ? 's' : ''}`;
+                    } else if (minutes > 0) {
+                        countdownText = `${minutes} minute${minutes > 1 ? 's' : ''}`;
                     } else {
-                        countdownText = `${hours} : ${minutes}`;
+                        countdownText = 'Starting now';
                     }
                     
                     element.textContent = countdownText;
                 } else {
-                    element.textContent = '0 .. 0 0'; // Session has started
+                    element.textContent = 'Starting now'; // Session has started
                 }
             });
         });
