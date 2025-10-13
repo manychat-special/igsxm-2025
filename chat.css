@@ -166,11 +166,11 @@
 }
 
 .comment-tag.featured {
-  background-color: var(#ffffff14);
+  background-color: rgba(255, 255, 255, 0.08);
 }
 
 .comment.featured>.comment-inside {
-  background-color: var(#ffffff17);
+  background-color: rgba(255, 255, 255, 0.08);
 }
 
 .comment-time {
