@@ -173,6 +173,58 @@
     
     <script src="session-visibility.js"></script>
     
+    <!-- Nested Collection Example -->
+    <div style="margin-top: 40px; padding: 20px; border: 2px solid #ddd; border-radius: 8px;">
+        <h2>Nested Collection Example</h2>
+        <p>This simulates a session page with a nested collection list showing related sessions.</p>
+        
+        <!-- Parent Session -->
+        <div class="session-item" 
+             data-agenda-item="main-session"
+             data-start-time="2024-01-15T10:00:00Z" 
+             data-end-time="2024-01-15T10:30:00Z">
+            
+            <div class="session-title">Main Session (Parent)</div>
+            <div class="session-time">10:00 - 10:30 UTC</div>
+            <div class="countdown-display">Starts in: <span data-session-countdown>Loading...</span></div>
+        </div>
+        
+        <!-- Nested Collection List -->
+        <div data-agenda-next="main-session" style="margin-top: 20px;">
+            <h3>Related Sessions (Filtered)</h3>
+            
+            <!-- Session 1: Simultaneous -->
+            <div class="session-item" 
+                 data-agenda-item
+                 data-start-time="2024-01-15T10:05:00Z" 
+                 data-end-time="2024-01-15T10:25:00Z">
+                <div class="session-title">Simultaneous Session</div>
+                <div class="session-time">10:05 - 10:25 UTC</div>
+                <div class="countdown-display">Starts in: <span data-session-countdown>Loading...</span></div>
+            </div>
+            
+            <!-- Session 2: Starting within 30 min after (will show) -->
+            <div class="session-item" 
+                 data-agenda-item
+                 data-start-time="2024-01-15T10:45:00Z" 
+                 data-end-time="2024-01-15T11:15:00Z">
+                <div class="session-title">Next Session (Within 30 min)</div>
+                <div class="session-time">10:45 - 11:15 UTC</div>
+                <div class="countdown-display">Starts in: <span data-session-countdown>Loading...</span></div>
+            </div>
+            
+            <!-- Session 3: Too far in future (will be hidden) -->
+            <div class="session-item" 
+                 data-agenda-item
+                 data-start-time="2024-01-15T11:30:00Z" 
+                 data-end-time="2024-01-15T12:00:00Z">
+                <div class="session-title">Later Session (Hidden - 1 hour after)</div>
+                <div class="session-time">11:30 - 12:00 UTC</div>
+                <div class="countdown-display">Starts in: <span data-session-countdown>Loading...</span></div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Example of how to use the session manager programmatically
         setTimeout(() => {

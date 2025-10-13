@@ -21,6 +21,7 @@ class SessionVisibilityManager {
     
     init() {
         this.findSessions();
+        this.findNestedCollections();
         this.updateAllSessions();
         this.startPeriodicUpdates();
         
@@ -82,6 +83,60 @@ class SessionVisibilityManager {
         });
         
         console.log(`Found ${this.sessions.length} sessions to manage`);
+    }
+    
+    findNestedCollections() {
+        const collectionLists = document.querySelectorAll('[data-agenda-next]');
+        
+        collectionLists.forEach(collectionList => {
+            const parentSessionId = collectionList.getAttribute('data-agenda-next');
+            const parentSession = this.sessions.find(s => 
+                s.element.getAttribute('data-agenda-item') === parentSessionId
+            );
+            
+            if (parentSession) {
+                const childSessions = collectionList.querySelectorAll('[data-agenda-item]');
+                this.filterNestedSessions(collectionList, childSessions, parentSession);
+            }
+        });
+    }
+    
+    filterNestedSessions(collectionList, childSessions, parentSession) {
+        const now = new Date();
+        const parentStartTime = parentSession.startTime.getTime();
+        const parentEndTime = parentSession.endTime.getTime();
+        
+        // Show sessions that are:
+        // 1. Running simultaneously (overlapping with parent session)
+        // 2. Starting soon after parent session (within 30 minutes)
+        const relevantSessions = [];
+        
+        childSessions.forEach(childElement => {
+            const startTime = childElement.getAttribute('data-start-time');
+            const endTime = childElement.getAttribute('data-end-time');
+            
+            if (startTime && endTime) {
+                const childStartTime = new Date(startTime).getTime();
+                const childEndTime = new Date(endTime).getTime();
+                
+                // Check if session is relevant
+                const isSimultaneous = (childStartTime <= parentEndTime && childEndTime >= parentStartTime);
+                const startsSoonAfter = (childStartTime > parentEndTime && childStartTime <= parentEndTime + (30 * 60 * 1000)); // 30 minutes
+                
+                if (isSimultaneous || startsSoonAfter) {
+                    relevantSessions.push(childElement);
+                } else {
+                    childElement.style.display = 'none';
+                }
+            }
+        });
+        
+        // Show relevant sessions
+        relevantSessions.forEach(session => {
+            session.style.display = '';
+        });
+        
+        console.log(`Filtered nested collection: showing ${relevantSessions.length} of ${childSessions.length} sessions`);
     }
     
     getSessionState(session) {
@@ -169,6 +224,23 @@ class SessionVisibilityManager {
             this.updateSessionVisibility(session);
         });
         this.updateCountdownTimers();
+        this.updateNestedCollections();
+    }
+    
+    updateNestedCollections() {
+        const collectionLists = document.querySelectorAll('[data-agenda-next]');
+        
+        collectionLists.forEach(collectionList => {
+            const parentSessionId = collectionList.getAttribute('data-agenda-next');
+            const parentSession = this.sessions.find(s => 
+                s.element.getAttribute('data-agenda-item') === parentSessionId
+            );
+            
+            if (parentSession) {
+                const childSessions = collectionList.querySelectorAll('[data-agenda-item]');
+                this.filterNestedSessions(collectionList, childSessions, parentSession);
+            }
+        });
     }
     
     startPeriodicUpdates() {
