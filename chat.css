@@ -123,6 +123,10 @@
   font-size: 1em;
 }
 
+.cancel-button {
+  background-color: var(--ht-color-box);
+}
+
 /* ========================================
    USER PROFILE & METADATA
    ======================================== */
