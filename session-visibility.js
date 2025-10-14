@@ -225,6 +225,30 @@ class SessionVisibilityManager {
             }
         });
         
+        // Handle data-after-session elements (with offset support)
+        const afterElements = element.querySelectorAll('[data-after-session]');
+        afterElements.forEach(el => {
+            const afterOffset = el.getAttribute('data-after-session');
+            const afterMinutes = afterOffset ? parseInt(afterOffset) : 0;
+            
+            if (afterMinutes > 0) {
+                // Show after specified delay
+                const afterTime = new Date(session.endTime.getTime() + (afterMinutes * 60 * 1000));
+                if (now >= afterTime) {
+                    el.style.display = '';
+                } else {
+                    el.style.display = 'none';
+                }
+            } else {
+                // Show immediately after session ends
+                if (now > session.endTime) {
+                    el.style.display = '';
+                } else {
+                    el.style.display = 'none';
+                }
+            }
+        });
+        
         // Add/remove state classes for additional styling
         element.classList.remove('session-before', 'session-during', 'session-after');
         element.classList.add(`session-${state}`);
