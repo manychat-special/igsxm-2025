@@ -196,7 +196,21 @@ data-start-time="2024-01-15T10:00:00+01:00"   // CET
 }
 ```
 
-## Troubleshooting
+## Local Timezone Script Integration
+
+The `local-timezone.js` script works alongside session visibility and provides timezone conversion for agenda items.
+
+#### Time Display Elements
+- `data-time-copy="start"`: Element to display start time in local format
+- `data-time-copy="end"`: Element to display end time in local format  
+- `data-time-copy="date"`: Element to display date in local format
+- `data-time-copy="tz"`: Element to display timezone abbreviation
+
+### Features
+- **Automatic Timezone Detection**: Converts PDT times to user's local timezone
+- **Smart Abbreviations**: Shows appropriate timezone abbreviations (BST, CEST, JST, etc.)
+- **24-hour Format**: Displays time in 24-hour format
+- **Webflow Compatible**: Works with dynamically loaded content
 
 ### Sessions Not Updating
 - Check browser console for errors
@@ -207,6 +221,11 @@ data-start-time="2024-01-15T10:00:00+01:00"   // CET
 - Make sure elements have `data-countdown` attribute
 - Check that session is in 'before' state
 - Verify start time is in the future
+
+### Timezone Conversion Issues
+- Verify `data-start-time` and `data-end-time` are set
+- Check that time display elements have correct `data-time-copy` attributes
+- Ensure session container has `data-agenda-item` attribute
 
 ### Performance Issues
 - Limit number of sessions on page
