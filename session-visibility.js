@@ -156,9 +156,8 @@ class SessionVisibilityManager {
         const now = new Date();
         const { startTime, endTime, element } = session;
         
-        // Проверяем атрибут data-during-session на элементах с содержимым
-        const duringElement = element.querySelector('[data-during-session]');
-        const duringOffset = duringElement ? duringElement.getAttribute('data-during-session') : null;
+        // Проверяем атрибут data-during-session на контейнере сессии
+        const duringOffset = element.getAttribute('data-during-session');
         const duringMinutes = duringOffset ? parseInt(duringOffset) : 0;
         
         // Вычисляем время с учетом offset
