@@ -20,6 +20,9 @@ document.addEventListener("DOMContentLoaded", function () {
     return isNaN(d) ? null : d;
   }
 
+  // Make parseAsPDT available globally for other scripts
+  window.parseAsPDT = parseAsPDT;
+
   // Return local timezone abbreviation (fixed for Oct 22–23, 2025)
   function getUserTzAbbr() {
     const tzIana = Intl.DateTimeFormat().resolvedOptions().timeZone;

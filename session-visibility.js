@@ -76,8 +76,8 @@ class SessionVisibilityManager {
             if (startTime && endTime) {
                 this.sessions.push({
                     element: element,
-                    startTime: new Date(startTime),
-                    endTime: new Date(endTime)
+                    startTime: window.parseAsPDT ? window.parseAsPDT(startTime) : new Date(startTime),
+                    endTime: window.parseAsPDT ? window.parseAsPDT(endTime) : new Date(endTime)
                 });
             }
         });
@@ -124,8 +124,8 @@ class SessionVisibilityManager {
             const endTime = childElement.getAttribute('data-end-time');
             
             if (startTime && endTime) {
-                const childStartTime = new Date(startTime).getTime();
-                const childEndTime = new Date(endTime).getTime();
+                const childStartTime = (window.parseAsPDT ? window.parseAsPDT(startTime) : new Date(startTime)).getTime();
+                const childEndTime = (window.parseAsPDT ? window.parseAsPDT(endTime) : new Date(endTime)).getTime();
                 
                 // Check if session is relevant
                 const isSimultaneous = (childStartTime < parentEndTime && childEndTime > parentStartTime);
