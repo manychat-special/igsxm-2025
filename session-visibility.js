@@ -160,12 +160,21 @@ class SessionVisibilityManager {
         const duringOffset = element.getAttribute('data-during-session');
         const duringMinutes = duringOffset ? parseInt(duringOffset) : 0;
         
-        // Вычисляем время окончания с учетом offset
-        const adjustedEndTime = new Date(endTime.getTime() + (duringMinutes * 60 * 1000));
+        // Вычисляем время с учетом offset
+        let adjustedStartTime = startTime;
+        let adjustedEndTime = endTime;
         
-        if (now < startTime) {
+        if (duringMinutes < 0) {
+            // Отрицательный offset - начинаем раньше
+            adjustedStartTime = new Date(startTime.getTime() + (duringMinutes * 60 * 1000));
+        } else if (duringMinutes > 0) {
+            // Положительный offset - заканчиваем позже
+            adjustedEndTime = new Date(endTime.getTime() + (duringMinutes * 60 * 1000));
+        }
+        
+        if (now < adjustedStartTime) {
             return 'before';
-        } else if (now >= startTime && now <= adjustedEndTime) {
+        } else if (now >= adjustedStartTime && now <= adjustedEndTime) {
             return 'during';
         } else {
             return 'after';
