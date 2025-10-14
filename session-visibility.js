@@ -209,13 +209,7 @@ class SessionVisibilityManager {
         const currentStateAttr = this.attributes[state];
         const currentStateElements = element.querySelectorAll(`[${currentStateAttr}]`);
         currentStateElements.forEach(el => {
-            if (currentStateAttr === 'data-during-session') {
-                // data-during-session shows only during real session time, not with offset
-                const isRealSessionTime = now >= session.startTime && now <= session.endTime;
-                el.style.display = isRealSessionTime ? '' : 'none';
-            } else {
-                el.style.display = '';
-            }
+            el.style.display = '';
         });
         
         // Handle data-agenda-live elements (only during real session time, no offset)
