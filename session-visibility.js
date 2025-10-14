@@ -201,6 +201,16 @@ class SessionVisibilityManager {
             el.style.display = '';
         });
         
+        // Handle data-agenda-live elements
+        const liveElements = element.querySelectorAll('[data-agenda-live]');
+        liveElements.forEach(el => {
+            if (state === 'during') {
+                el.style.display = 'flex';
+            } else {
+                el.style.display = 'none';
+            }
+        });
+        
         // Add/remove state classes for additional styling
         element.classList.remove('session-before', 'session-during', 'session-after');
         element.classList.add(`session-${state}`);
