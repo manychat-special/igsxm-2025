@@ -205,7 +205,7 @@ class SessionVisibilityManager {
             });
         });
         
-        // Show elements for current state (except data-during-session which has special logic)
+        // Show elements for current state
         const currentStateAttr = this.attributes[state];
         const currentStateElements = element.querySelectorAll(`[${currentStateAttr}]`);
         currentStateElements.forEach(el => {
