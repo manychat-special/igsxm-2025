@@ -156,20 +156,20 @@ class SessionVisibilityManager {
         const now = new Date();
         const { startTime, endTime, element } = session;
         
-        // Проверяем атрибут data-during-session на дочерних элементах
+        // Check data-during-session attribute on child elements
         const duringElement = element.querySelector('[data-during-session]');
         const duringOffset = duringElement ? duringElement.getAttribute('data-during-session') : null;
         const duringMinutes = duringOffset ? parseInt(duringOffset) : 0;
         
-        // Вычисляем время с учетом offset
+        // Calculate time with offset
         let adjustedStartTime = startTime;
         let adjustedEndTime = endTime;
         
         if (duringMinutes < 0) {
-            // Отрицательный offset - начинаем раньше
+            // Negative offset - start earlier
             adjustedStartTime = new Date(startTime.getTime() + (duringMinutes * 60 * 1000));
         } else if (duringMinutes > 0) {
-            // Положительный offset - заканчиваем позже
+            // Positive offset - end later
             adjustedEndTime = new Date(endTime.getTime() + (duringMinutes * 60 * 1000));
         }
         
