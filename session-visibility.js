@@ -156,16 +156,16 @@ class SessionVisibilityManager {
         const now = new Date();
         const { startTime, endTime, element } = session;
         
-        // Проверяем атрибут data-before-session
-        const beforeOffset = element.getAttribute('data-before-session');
-        const beforeMinutes = beforeOffset ? parseInt(beforeOffset) : 0;
+        // Проверяем атрибут data-during-session
+        const duringOffset = element.getAttribute('data-during-session');
+        const duringMinutes = duringOffset ? parseInt(duringOffset) : 0;
         
-        // Вычисляем время начала с учетом offset
-        const adjustedStartTime = new Date(startTime.getTime() - (beforeMinutes * 60 * 1000));
+        // Вычисляем время окончания с учетом offset
+        const adjustedEndTime = new Date(endTime.getTime() + (duringMinutes * 60 * 1000));
         
-        if (now < adjustedStartTime) {
+        if (now < startTime) {
             return 'before';
-        } else if (now >= startTime && now <= endTime) {
+        } else if (now >= startTime && now <= adjustedEndTime) {
             return 'during';
         } else {
             return 'after';
