@@ -172,11 +172,26 @@ class SessionVisibilityManager {
             adjustedEndTime = new Date(endTime.getTime() + (duringMinutes * 60 * 1000));
         }
         
+        // Отладочная информация
+        console.log('=== SESSION STATE DEBUG ===');
+        console.log('Now:', now.toLocaleTimeString());
+        console.log('Start time:', startTime.toLocaleTimeString());
+        console.log('End time:', endTime.toLocaleTimeString());
+        console.log('During offset:', duringOffset);
+        console.log('During minutes:', duringMinutes);
+        console.log('Adjusted start:', adjustedStartTime.toLocaleTimeString());
+        console.log('Adjusted end:', adjustedEndTime.toLocaleTimeString());
+        console.log('Now < adjustedStartTime:', now < adjustedStartTime);
+        console.log('Now >= adjustedStartTime && now <= adjustedEndTime:', now >= adjustedStartTime && now <= adjustedEndTime);
+        
         if (now < adjustedStartTime) {
+            console.log('Returning: before');
             return 'before';
         } else if (now >= adjustedStartTime && now <= adjustedEndTime) {
+            console.log('Returning: during');
             return 'during';
         } else {
+            console.log('Returning: after');
             return 'after';
         }
     }
