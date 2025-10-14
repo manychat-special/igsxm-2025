@@ -161,6 +161,11 @@ class SessionVisibilityManager {
         const duringOffset = duringElement ? duringElement.getAttribute('data-during-session') : null;
         const duringMinutes = duringOffset ? parseInt(duringOffset) : 0;
         
+        // Check data-after-session attribute on child elements
+        const afterElement = element.querySelector('[data-after-session]');
+        const afterOffset = afterElement ? afterElement.getAttribute('data-after-session') : null;
+        const afterMinutes = afterOffset ? parseInt(afterOffset) : 0;
+        
         // Calculate time with offset
         let adjustedStartTime = startTime;
         let adjustedEndTime = endTime;
@@ -171,6 +176,12 @@ class SessionVisibilityManager {
         } else if (duringMinutes > 0) {
             // Positive offset - end later
             adjustedEndTime = new Date(endTime.getTime() + (duringMinutes * 60 * 1000));
+        }
+        
+        // Apply after-session offset
+        if (afterMinutes > 0) {
+            // Positive offset - end later for after state
+            adjustedEndTime = new Date(endTime.getTime() + (afterMinutes * 60 * 1000));
         }
         
         if (now < adjustedStartTime) {
