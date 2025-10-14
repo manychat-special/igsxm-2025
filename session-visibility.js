@@ -212,10 +212,13 @@ class SessionVisibilityManager {
             el.style.display = '';
         });
         
-        // Handle data-agenda-live elements
+        // Handle data-agenda-live elements (only during real session time, no offset)
         const liveElements = element.querySelectorAll('[data-agenda-live]');
+        const now = new Date();
+        const isRealSessionTime = now >= session.startTime && now <= session.endTime;
+        
         liveElements.forEach(el => {
-            if (state === 'during') {
+            if (isRealSessionTime) {
                 el.style.display = 'flex';
             } else {
                 el.style.display = 'none';
