@@ -43,6 +43,7 @@ window.$memberstackDom.getCurrentMember().then(async ({ data }) => {
     comments.setAttribute('t-featured', '📍');
     comments.setAttribute('t-loved-by', '❤️');
     comments.setAttribute('t-edit', '↑');
+    comments.setAttribute('t-cancel', '✕');
     
     if (data) {
       const email = data.auth.email;

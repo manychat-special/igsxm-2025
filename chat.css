@@ -124,11 +124,15 @@ background-color: var(--ht-color-accent-15);
   height: 32px;
   padding: 8px;
   border-radius: 1000px;
-  font-size: 1em;
+  font-size: 1em; 
 }
 
 .cancel-button {
   background-color: var(--ht-color-box);
+}
+
+.comment-link-copy {
+  display: none !important;
 }
 
 /* ========================================
