@@ -51,6 +51,10 @@
   padding-top: 1rem;
 }
 
+.comment-replies {
+  margin-top: 8px;
+}
+
 .comment .comment-inside:focus, .comment .comment-inside:focus-visible {
   outline: none;
   box-shadow: none;
@@ -207,7 +211,6 @@ background-color: var(--ht-color-accent-15);
 
 .comment.featured>.comment-inside {
   background: linear-gradient(to left, rgba(255, 0, 0, 0.33) 0%, rgba(255, 0, 0, 0.05) 30%, transparent 100%);
-  border-radius: 16px;
 }
 
 .comment-time {
