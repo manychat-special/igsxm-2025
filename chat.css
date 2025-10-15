@@ -103,9 +103,17 @@
   min-height: auto;
 }
 
+.rich-editor-mention-autocomplete {
+  background: var(--ht-color-accent-15);
+}
+
+.mention-suggestions .user.active {
+  background: var(--ht-color-accent-15);
+}
+
 .ProseMirror {
   border-radius: 16px;
-  padding: 16px 50px 16px 16px
+  padding: 16px 60px 16px 16px
 }
 
 .comment-content x-mention, .ProseMirror x-mention {
