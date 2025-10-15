@@ -78,6 +78,14 @@ class UpcomingSessionsManager {
             if (cardContainer) cardContainer.style.display = '';
         });
         
+        // Force grid reflow after update
+        const grid = container.element.querySelector('.w-dyn-items');
+        if (grid) {
+            grid.style.display = 'none';
+            void grid.offsetHeight; // заставляем браузер пересчитать layout
+            grid.style.display = 'grid';
+        }
+        
         console.log(`Container updated: showing ${Math.min(upcomingSessions.length, container.limit)} of ${sessions.length} sessions`);
     }
     
