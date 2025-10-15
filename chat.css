@@ -2,7 +2,7 @@
    HIDDEN ELEMENTS
    ======================================== */
 
-#sorter, .comment-replied-to, .main-box-footer, .comments-top, .main-box-header-wrap {
+#sorter, .comment-replied-to, .main-box-footer, .comments-top {
   display: none;
 }
 
