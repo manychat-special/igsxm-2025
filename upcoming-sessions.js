@@ -1,6 +1,7 @@
 /**
  * Upcoming Sessions Manager
- * Shows next 3 upcoming sessions based on start time
+ * Shows next N upcoming sessions based on start time
+ * (Removes past sessions from DOM completely)
  */
 
 class UpcomingSessionsManager {
@@ -42,69 +43,73 @@ class UpcomingSessionsManager {
     updateContainer(container) {
         const sessions = container.element.querySelectorAll('[data-agenda-item]');
         const now = new Date();
+
+        // Remove past sessions from DOM
+        sessions.forEach(session => {
+            const startTime = session.getAttribute('data-start-time');
+            if (!startTime) return;
+
+            const sessionStartTime = window.parseAsPDT 
+                ? window.parseAsPDT(startTime) 
+                : new Date(startTime);
+
+            if (sessionStartTime <= now) {
+                const cardContainer = session.closest('.w-dyn-item');
+                if (cardContainer) cardContainer.remove();
+                else session.remove();
+            }
+        });
+
+        // Re-query after removal
+        const remainingSessions = container.element.querySelectorAll('[data-agenda-item]');
         
-        // Filter and sort upcoming sessions
-        const upcomingSessions = Array.from(sessions).filter(session => {
+        // Sort future sessions
+        const upcomingSessions = Array.from(remainingSessions).filter(session => {
             const startTime = session.getAttribute('data-start-time');
             if (!startTime) return false;
             
-            const sessionStartTime = window.parseAsPDT ? 
-                window.parseAsPDT(startTime) : new Date(startTime);
+            const sessionStartTime = window.parseAsPDT 
+                ? window.parseAsPDT(startTime) 
+                : new Date(startTime);
             
             return sessionStartTime > now;
         }).sort((a, b) => {
-            const aTime = window.parseAsPDT ? 
-                window.parseAsPDT(a.getAttribute('data-start-time')) : 
-                new Date(a.getAttribute('data-start-time'));
-            const bTime = window.parseAsPDT ? 
-                window.parseAsPDT(b.getAttribute('data-start-time')) : 
-                new Date(b.getAttribute('data-start-time'));
+            const aTime = window.parseAsPDT 
+                ? window.parseAsPDT(a.getAttribute('data-start-time')) 
+                : new Date(a.getAttribute('data-start-time'));
+            const bTime = window.parseAsPDT 
+                ? window.parseAsPDT(b.getAttribute('data-start-time')) 
+                : new Date(b.getAttribute('data-start-time'));
             
             return aTime - bTime;
         });
         
-        // Show/hide sessions based on limit
-        // First, hide all sessions
-        sessions.forEach(session => {
+        // Hide all remaining, then show only the first N
+        remainingSessions.forEach(session => {
             const cardContainer = session.closest('.w-dyn-item');
-            session.style.display = 'none';
             if (cardContainer) cardContainer.style.display = 'none';
+            session.style.display = 'none';
         });
         
-        // Then show only the first N upcoming sessions
         upcomingSessions.slice(0, container.limit).forEach(session => {
             const cardContainer = session.closest('.w-dyn-item');
-            session.style.display = '';
             if (cardContainer) cardContainer.style.display = '';
+            session.style.display = '';
         });
         
-        // Force grid reflow after update
-        const grid = container.element.querySelector('.w-dyn-items');
-        if (grid) {
-            grid.style.display = 'none';
-            void grid.offsetHeight; // заставляем браузер пересчитать layout
-            grid.style.display = 'grid';
-        }
-        
-        console.log(`Container updated: showing ${Math.min(upcomingSessions.length, container.limit)} of ${sessions.length} sessions`);
+        console.log(`Container updated: showing ${Math.min(upcomingSessions.length, container.limit)} upcoming sessions`);
     }
     
     updateAllContainers() {
-        this.containers.forEach(container => {
-            this.updateContainer(container);
-        });
+        this.containers.forEach(container => this.updateContainer(container));
     }
     
     startPeriodicUpdates() {
-        this.updateInterval = setInterval(() => {
-            this.updateAllContainers();
-        }, this.checkInterval);
+        this.updateInterval = setInterval(() => this.updateAllContainers(), this.checkInterval);
     }
     
     destroy() {
-        if (this.updateInterval) {
-            clearInterval(this.updateInterval);
-        }
+        if (this.updateInterval) clearInterval(this.updateInterval);
     }
     
     refresh() {
@@ -119,13 +124,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.upcomingManager = new UpcomingSessionsManager();
 });
 
-// Also initialize if script loads after DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        if (!window.upcomingManager) {
-            window.upcomingManager = new UpcomingSessionsManager();
-        }
-    });
-} else {
+if (document.readyState !== 'loading' && !window.upcomingManager) {
     window.upcomingManager = new UpcomingSessionsManager();
 }
