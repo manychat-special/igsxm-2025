@@ -44,6 +44,12 @@
   width: 100%;
 }
 
+.comment-note {
+  margin-top: 8px;
+  margin-bottom: 0px;
+  font-size: 0.75em;
+}
+
 .comments-list.parent {
   display: flex;
   flex-direction: column-reverse;
