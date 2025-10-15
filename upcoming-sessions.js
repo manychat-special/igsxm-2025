@@ -65,17 +65,13 @@ class UpcomingSessionsManager {
             return aTime - bTime;
         });
         
-        // Hide all sessions first (как в session-visibility.js)
+        // Hide all sessions first (like in session-visibility.js)
         sessions.forEach(session => {
-            const cardContainer = session.closest('.w-dyn-item');
-            if (cardContainer) cardContainer.style.display = 'none';
             session.style.display = 'none';
         });
         
         // Show only the first N upcoming sessions
         upcomingSessions.slice(0, container.limit).forEach(session => {
-            const cardContainer = session.closest('.w-dyn-item');
-            if (cardContainer) cardContainer.style.display = '';
             session.style.display = '';
         });
         
