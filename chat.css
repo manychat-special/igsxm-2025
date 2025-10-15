@@ -89,9 +89,14 @@
 
 .comment-writer {
   box-shadow: 0 0 0 1px var(--ht-color-accent-15);
+  background-color: var(--ht-color-box);
   margin-right: 1px;
   margin-bottom: 1px;
   border-radius: 16px;
+}
+
+.rich-editor {
+  background-color: transparent;
 }
 
 .rich-editor.focused .comment-writer .ProseMirror {
