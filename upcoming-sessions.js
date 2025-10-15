@@ -64,14 +64,19 @@ class UpcomingSessionsManager {
         });
         
         // Show/hide sessions based on limit
-        // First, hide all sessions
         sessions.forEach(session => {
-            session.style.display = 'none';
-        });
-        
-        // Then show only the first N upcoming sessions
-        upcomingSessions.slice(0, container.limit).forEach(session => {
-            session.style.display = '';
+            // Find the parent Webflow container (.w-dyn-item)
+            const cardContainer = session.closest('.w-dyn-item');
+            
+            if (upcomingSessions.includes(session)) {
+                // Show both the session and its container
+                session.style.display = '';
+                if (cardContainer) cardContainer.style.display = '';
+            } else {
+                // Hide both the session and its container
+                session.style.display = 'none';
+                if (cardContainer) cardContainer.style.display = 'none';
+            }
         });
         
         console.log(`Container updated: showing ${Math.min(upcomingSessions.length, container.limit)} of ${sessions.length} sessions`);
