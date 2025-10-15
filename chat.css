@@ -26,6 +26,26 @@
   margin: 0px;
 }
 
+.main-box-header-wrap {
+  margin-bottom: 0px;
+  margin-top: 1rem;
+}
+
+.online-count {
+  font-family: 'CoFo Sans Mono';
+  text-transform: uppercase;
+  background-color: var(--ht-color-accent-15);
+}
+
+.online-count:after {
+  margin-inline-start: 6px;
+  background-color: #00F613;
+}
+
+.notification-icon {
+  margin-inline-end: 0px;
+}
+
 .comments-wrap {
   display: flex;
   flex-direction: column-reverse;
