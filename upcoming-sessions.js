@@ -64,12 +64,14 @@ class UpcomingSessionsManager {
         });
         
         // Show/hide sessions based on limit
-        sessions.forEach((session, index) => {
-            if (index < container.limit && upcomingSessions.includes(session)) {
-                session.style.display = '';
-            } else {
-                session.style.display = 'none';
-            }
+        // First, hide all sessions
+        sessions.forEach(session => {
+            session.style.display = 'none';
+        });
+        
+        // Then show only the first N upcoming sessions
+        upcomingSessions.slice(0, container.limit).forEach(session => {
+            session.style.display = '';
         });
         
         console.log(`Container updated: showing ${Math.min(upcomingSessions.length, container.limit)} of ${sessions.length} sessions`);
