@@ -113,6 +113,7 @@
 
 .mention-suggestions .user.active {
   background: var(--ht-color-accent-15);
+  color: var(--ht-color-accent);
 }
 
 .ProseMirror {
