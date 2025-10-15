@@ -44,6 +44,10 @@ window.$memberstackDom.getCurrentMember().then(async ({ data }) => {
     comments.setAttribute('t-loved-by', '❤️');
     comments.setAttribute('t-edit', '↑');
     comments.setAttribute('t-cancel', '✕');
+    comments.setAttribute('t-comments-multi', '* messages');
+    comments.setAttribute('t-comments-1', '1 message');
+    comments.setAttribute('t-comments-0', '0 messages');
+    comments.setAttribute('t-no-comments-text', 'No messages yet!');
     
     if (data) {
       const email = data.auth.email;
