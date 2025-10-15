@@ -27,10 +27,10 @@ class UpcomingSessionsManager {
     }
     
     findContainers() {
-        const containerElements = document.querySelectorAll('[data-agenda-next]');
+        const containerElements = document.querySelectorAll('[data-upcoming-sessions]');
         
         containerElements.forEach(element => {
-            const limit = parseInt(element.getAttribute('data-agenda-next')) || 3;
+            const limit = parseInt(element.getAttribute('data-upcoming-sessions')) || 3;
             this.containers.push({
                 element: element,
                 limit: limit
