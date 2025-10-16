@@ -378,7 +378,7 @@ class AdditionalSessionOverlayManager {
             if (this.sessionEndedOverlay && timeSinceEnd >= 60000 && timeSinceEnd <= 70000) {
                 if (!this.shownSessions.has(sessionId + '-ended')) {
                     this.shownSessions.add(sessionId + '-ended');
-                    this.sessionEndedOverlay.style.visibility = 'visible';
+                    this.sessionEndedOverlay.classList.remove('hide');
                 }
             }
             
@@ -392,7 +392,7 @@ class AdditionalSessionOverlayManager {
                         if (timeSinceEnd >= delayMs && timeSinceEnd <= delayMs + 10000) {
                             if (!this.shownSessions.has(sessionId + '-ondemand')) {
                                 this.shownSessions.add(sessionId + '-ondemand');
-                                this.sessionOndemandOverlay.style.visibility = 'visible';
+                                this.sessionOndemandOverlay.classList.remove('hide');
                             }
                         }
                     }
