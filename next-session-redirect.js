@@ -25,6 +25,11 @@ class NextSessionOverlayManager {
         
         // Начинаем проверку каждые 5 секунд
         this.startChecking();
+        
+        // ВРЕМЕННО: Показываем оверлей сразу для тестирования
+        setTimeout(() => {
+            this.testShowOverlay();
+        }, 2000);
     }
     
     startChecking() {
@@ -78,16 +83,17 @@ class NextSessionOverlayManager {
         // Находим следующую сессию
         const nextSession = this.getNextSession(currentSessionElement);
         
-        if (!nextSession) {
-            console.log('No next session found, hiding overlay');
-            return;
-        }
-        
-        // Настраиваем ссылку
+        // Настраиваем ссылку только если есть следующая сессия
         const linkElement = this.overlayElement.querySelector('[data-next-redirect-link]');
         if (linkElement) {
-            linkElement.href = `/${nextSession.slug}`;
-            console.log(`Next session link set to: /${nextSession.slug}`);
+            if (nextSession) {
+                linkElement.href = `/${nextSession.slug}`;
+                linkElement.style.display = '';
+                console.log(`Next session link set to: /${nextSession.slug}`);
+            } else {
+                linkElement.style.display = 'none';
+                console.log('No next session found, hiding link');
+            }
         }
         
         // Скрываем оверлей
@@ -102,10 +108,23 @@ class NextSessionOverlayManager {
         
         console.log(`Overlay shown - session ended, will hide in ${displayTime} seconds`);
         
-        // Автоматически скрываем через указанное время
-        this.currentTimer = setTimeout(() => {
-            this.hideOverlay();
-        }, displayTimeMs);
+        // ВРЕМЕННО ОТКЛЮЧЕНО: Автоматически скрываем через указанное время
+        // this.currentTimer = setTimeout(() => {
+        //     this.hideOverlay();
+        // }, displayTimeMs);
+    }
+    
+    // ВРЕМЕННО: Метод для тестирования - принудительно показать оверлей
+    testShowOverlay() {
+        console.log('Testing overlay display...');
+        
+        // Находим первую сессию для тестирования
+        const firstSession = document.querySelector('[data-agenda-item]');
+        if (firstSession) {
+            this.showOverlay(firstSession);
+        } else {
+            console.log('No sessions found for testing');
+        }
     }
     
     hideOverlay() {
