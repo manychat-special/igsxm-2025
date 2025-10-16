@@ -306,9 +306,10 @@ class NextSessionOverlayManager {
     }
 }
 
-// Initialize
+// Initialize both managers
 document.addEventListener('DOMContentLoaded', () => {
     window.nextSessionOverlayManager = new NextSessionOverlayManager();
+    window.additionalSessionOverlayManager = new AdditionalSessionOverlayManager();
 });
 
 // Also initialize if script loads after DOM
@@ -317,9 +318,13 @@ if (document.readyState === 'loading') {
         if (!window.nextSessionOverlayManager) {
             window.nextSessionOverlayManager = new NextSessionOverlayManager();
         }
+        if (!window.additionalSessionOverlayManager) {
+            window.additionalSessionOverlayManager = new AdditionalSessionOverlayManager();
+        }
     });
 } else {
     window.nextSessionOverlayManager = new NextSessionOverlayManager();
+    window.additionalSessionOverlayManager = new AdditionalSessionOverlayManager();
 }
 
 /**
@@ -423,18 +428,3 @@ class AdditionalSessionOverlayManager {
     }
 }
 
-// Initialize additional overlay manager
-document.addEventListener('DOMContentLoaded', () => {
-    window.additionalSessionOverlayManager = new AdditionalSessionOverlayManager();
-});
-
-// Also initialize if script loads after DOM
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        if (!window.additionalSessionOverlayManager) {
-            window.additionalSessionOverlayManager = new AdditionalSessionOverlayManager();
-        }
-    });
-} else {
-    window.additionalSessionOverlayManager = new AdditionalSessionOverlayManager();
-}
