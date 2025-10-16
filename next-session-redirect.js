@@ -120,7 +120,7 @@ class NextSessionOverlayManager {
         this.overlayElement.style.display = 'none';
         
         // Show overlay
-        this.overlayElement.style.display = 'block';
+        this.overlayElement.style.display = 'flex';
         
         // Setup cancel button
         this.setupCancelButton();
