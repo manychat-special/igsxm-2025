@@ -296,7 +296,7 @@ background-color: var(--ht-color-accent-15);
 }
 
 .reaction:focus {
-  outline: 1px solid var(--ht-color-accent-35);
+  outline: 0px solid var(--ht-color-accent-35);
 }
 
 .reactions-wrap {
@@ -305,6 +305,7 @@ background-color: var(--ht-color-accent-15);
   position: sticky;
   top: 0;
   z-index: 9999;
+  margin-bottom: 10px
 }
 
 .reaction img {
