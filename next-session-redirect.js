@@ -87,9 +87,15 @@ class NextSessionOverlayManager {
         const linkElement = this.overlayElement.querySelector('[data-next-redirect-link]');
         if (linkElement) {
             if (nextSession) {
-                linkElement.href = `/${nextSession.slug}`;
+                // Берем текущий URL и заменяем только slug в конце
+                const currentUrl = window.location.href;
+                const urlParts = currentUrl.split('/');
+                urlParts[urlParts.length - 1] = nextSession.slug; // Заменяем последнюю часть на новый slug
+                const newUrl = urlParts.join('/');
+                
+                linkElement.href = newUrl;
                 linkElement.style.display = '';
-                console.log(`Next session link set to: /${nextSession.slug}`);
+                console.log(`Next session link set to: ${newUrl}`);
             } else {
                 linkElement.style.display = 'none';
                 console.log('No next session found, hiding link');
