@@ -58,31 +58,41 @@ class NextSessionOverlayManager {
         });
     }
     
-    getNextSession(currentSessionElement) {
+    getNextSession(endedSessionElement) {
         // Get all sessions on page
         const allSessions = document.querySelectorAll('[data-agenda-item]');
         const sessions = Array.from(allSessions).map(el => ({
             element: el,
             slug: el.getAttribute('data-agenda-item'),
             title: el.getAttribute('data-agenda-title') || 'Untitled Session',
-            startTime: new Date(el.getAttribute('data-start-time'))
+            startTime: new Date(el.getAttribute('data-start-time')),
+            endTime: new Date(el.getAttribute('data-end-time'))
         }));
         
         // Sort by start time
         sessions.sort((a, b) => a.startTime - b.startTime);
         
-        // Find current session index
-        const currentIndex = sessions.findIndex(s => s.element === currentSessionElement);
+        // Find the session that just ended
+        const endedIndex = sessions.findIndex(s => s.element === endedSessionElement);
         
-        // Return next session (if exists)
-        return sessions[currentIndex + 1] || null;
+        // Find the next session that starts after the ended session
+        const now = new Date();
+        for (let i = endedIndex + 1; i < sessions.length; i++) {
+            const session = sessions[i];
+            // Only return sessions that haven't started yet or just started
+            if (session.startTime > now || Math.abs(session.startTime - now) <= 5000) {
+                return session;
+            }
+        }
+        
+        return null;
     }
     
-    showOverlay(currentSessionElement) {
+    showOverlay(endedSessionElement) {
         if (!this.overlayElement) return;
         
         // Find next session
-        const nextSession = this.getNextSession(currentSessionElement);
+        const nextSession = this.getNextSession(endedSessionElement);
         
         // Setup link and title only if next session exists
         const linkElement = this.overlayElement.querySelector('[data-next-redirect-link]');
