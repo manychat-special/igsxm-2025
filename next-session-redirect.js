@@ -375,7 +375,7 @@ class AdditionalSessionOverlayManager {
             const sessionId = sessionElement.getAttribute('data-agenda-item');
             
             // Check session-ended overlay (1 minute after session ends)
-            if (this.sessionEndedOverlay && timeSinceEnd >= 60000 && timeSinceEnd <= 70000) {
+            if (this.sessionEndedOverlay && timeSinceEnd >= 60000) {
                 if (!this.shownSessions.has(sessionId + '-ended')) {
                     this.shownSessions.add(sessionId + '-ended');
                     this.sessionEndedOverlay.classList.remove('hide');
@@ -389,7 +389,7 @@ class AdditionalSessionOverlayManager {
                     const delayMinutes = parseInt(ondemandDelay);
                     if (!isNaN(delayMinutes)) {
                         const delayMs = delayMinutes * 60 * 1000;
-                        if (timeSinceEnd >= delayMs && timeSinceEnd <= delayMs + 10000) {
+                        if (timeSinceEnd >= delayMs) {
                             if (!this.shownSessions.has(sessionId + '-ondemand')) {
                                 this.shownSessions.add(sessionId + '-ondemand');
                                 this.sessionOndemandOverlay.classList.remove('hide');
