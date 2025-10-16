@@ -1,33 +1,32 @@
 /**
  * Simple Next Session Overlay Manager
- * Простой скрипт для показа оверлея когда сессия заканчивается
+ * Shows overlay when session ends and redirects to next session
  */
 class NextSessionOverlayManager {
     constructor() {
         this.overlayElement = null;
         this.currentTimer = null;
         this.checkInterval = null;
-        this.progressTimer = null; // Таймер для прогресс-бара
+        this.progressTimer = null; // Progress bar timer
         
         this.init();
     }
     
     init() {
-        // Находим оверлей на странице
+        // Find overlay element on page
         this.overlayElement = document.querySelector('[data-next-redirect]');
         
         if (!this.overlayElement) {
-            console.log('No overlay element found with [data-next-redirect]');
             return;
         }
         
-        // Скрываем оверлей изначально
+        // Hide overlay initially
         this.overlayElement.style.display = 'none';
         
-        // Начинаем проверку каждые 5 секунд
+        // Start checking every 5 seconds
         this.startChecking();
         
-        // ВРЕМЕННО: Показываем оверлей сразу для тестирования
+        // TEMPORARY: Show overlay immediately for testing
         setTimeout(() => {
             this.testShowOverlay();
         }, 2000);
@@ -42,7 +41,7 @@ class NextSessionOverlayManager {
     checkForSessionEnd() {
         const now = new Date();
         
-        // Ищем все сессии на странице
+        // Find all sessions on page
         const sessions = document.querySelectorAll('[data-agenda-item]');
         
         sessions.forEach(sessionElement => {
@@ -52,7 +51,7 @@ class NextSessionOverlayManager {
             const endTime = new Date(endTimeStr);
             const timeDiff = Math.abs(now.getTime() - endTime.getTime());
             
-            // Если разница меньше 5 секунд (сессия только что закончилась)
+            // If difference is less than 5 seconds (session just ended)
             if (timeDiff <= 5000) {
                 this.showOverlay(sessionElement);
             }
@@ -60,102 +59,96 @@ class NextSessionOverlayManager {
     }
     
     getNextSession(currentSessionElement) {
-        // Получаем все сессии на странице
+        // Get all sessions on page
         const allSessions = document.querySelectorAll('[data-agenda-item]');
         const sessions = Array.from(allSessions).map(el => ({
             element: el,
             slug: el.getAttribute('data-agenda-item'),
-            title: el.getAttribute('data-agenda-title') || 'Untitled Session', // Получаем название сессии
+            title: el.getAttribute('data-agenda-title') || 'Untitled Session',
             startTime: new Date(el.getAttribute('data-start-time'))
         }));
         
-        // Сортируем по времени начала
+        // Sort by start time
         sessions.sort((a, b) => a.startTime - b.startTime);
         
-        // Находим индекс текущей сессии
+        // Find current session index
         const currentIndex = sessions.findIndex(s => s.element === currentSessionElement);
         
-        // Возвращаем следующую сессию (если есть)
+        // Return next session (if exists)
         return sessions[currentIndex + 1] || null;
     }
     
     showOverlay(currentSessionElement) {
         if (!this.overlayElement) return;
         
-        // Находим следующую сессию
+        // Find next session
         const nextSession = this.getNextSession(currentSessionElement);
         
-        // Настраиваем ссылку и название только если есть следующая сессия
+        // Setup link and title only if next session exists
         const linkElement = this.overlayElement.querySelector('[data-next-redirect-link]');
         const titleElement = this.overlayElement.querySelector('[data-next-redirect-title]');
         
         if (nextSession) {
-            // Настраиваем ссылку
+            // Setup link
             if (linkElement) {
-                // Берем текущий URL и заменяем только slug в конце
+                // Get current URL and replace only slug at the end
                 const currentUrl = window.location.href;
                 const urlParts = currentUrl.split('/');
-                urlParts[urlParts.length - 1] = nextSession.slug; // Заменяем последнюю часть на новый slug
+                urlParts[urlParts.length - 1] = nextSession.slug;
                 const newUrl = urlParts.join('/');
                 
                 linkElement.href = newUrl;
                 linkElement.style.display = '';
-                console.log(`Next session link set to: ${newUrl}`);
             }
             
-            // Настраиваем название
+            // Setup title
             if (titleElement) {
                 titleElement.textContent = nextSession.title;
                 titleElement.style.display = '';
-                console.log(`Next session title set to: ${nextSession.title}`);
             }
         } else {
-            // Скрываем элементы если нет следующей сессии
+            // Hide elements if no next session
             if (linkElement) {
                 linkElement.style.display = 'none';
             }
             if (titleElement) {
                 titleElement.style.display = 'none';
             }
-            console.log('No next session found, hiding link and title');
         }
         
-        // Скрываем оверлей
+        // Hide overlay
         this.overlayElement.style.display = 'none';
         
-        // Показываем оверлей
+        // Show overlay
         this.overlayElement.style.display = 'block';
         
-        // Настраиваем кнопку отмены
+        // Setup cancel button
         this.setupCancelButton();
         
-        // Анимация появления снизу с баунсом через GSAP
+        // Animate overlay appearance from bottom with bounce
         this.animateOverlayIn();
         
-        // Получаем время показа из атрибута data-next-redirect (по умолчанию 15 секунд)
+        // Get display time from data-next-redirect attribute (default 15 seconds)
         const displayTime = parseInt(this.overlayElement.getAttribute('data-next-redirect')) || 15;
         const displayTimeMs = displayTime * 1000;
         
-        console.log(`Overlay shown - session ended, will hide in ${displayTime} seconds`);
-        
-        // Запускаем прогресс-бар и автоматический редирект
+        // Start progress bar and automatic redirect
         this.startProgressBar(displayTimeMs, linkElement);
     }
     
     animateOverlayIn() {
-        // Проверяем, что GSAP доступен
+        // Check if GSAP is available
         if (typeof gsap === 'undefined') {
-            console.log('GSAP not available, skipping animation');
             return;
         }
         
-        // Устанавливаем начальное состояние (iOS drawer стиль)
+        // Set initial state 
         gsap.set(this.overlayElement, {
-            y: '100%', // Полностью ниже экрана
-            scale: 0.95 // Легкое уменьшение для эффекта глубины
+            y: '100%', // Completely below screen
+            scale: 0.95 // Slight reduction for depth effect
         });
         
-        // Анимация появления снизу (iOS drawer стиль)
+        // Animate appearance from bottom 
         gsap.to(this.overlayElement, {
             y: '0%',
             scale: 1,
@@ -163,103 +156,109 @@ class NextSessionOverlayManager {
             ease: "power2.out",
             delay: 0.1
         });
-        
-        console.log('Overlay animation started (iOS drawer style)');
     }
     
     setupCancelButton() {
         const cancelButton = this.overlayElement.querySelector('[data-next-redirect-cancel]');
         
         if (!cancelButton) {
-            console.log('No cancel button found with [data-next-redirect-cancel]');
             return;
         }
         
-        // Удаляем предыдущие обработчики
+        // Remove previous handlers
         cancelButton.onclick = null;
         
-        // Добавляем новый обработчик
+        // Add new handler
         cancelButton.onclick = () => {
-            console.log('Cancel button clicked - hiding overlay');
             this.hideOverlayWithAnimation();
         };
-        
-        console.log('Cancel button setup complete');
     }
     
     hideOverlayWithAnimation() {
-        // Проверяем, что GSAP доступен
+        // Check if GSAP is available
         if (typeof gsap === 'undefined') {
-            console.log('GSAP not available, hiding overlay without animation');
             this.hideOverlay();
             return;
         }
         
-        // Анимация скрытия вниз (iOS drawer стиль)
+        // Hide animation down 
         gsap.to(this.overlayElement, {
-            y: '100%', // Полностью уходит вниз
-            scale: 0.95, // Легкое уменьшение
+            y: '100%', // Completely goes down
+            scale: 0.95, // Slight reduction
             duration: 0.4,
             ease: "power2.in",
             onComplete: () => {
                 this.hideOverlay();
             }
         });
-        
-        console.log('Overlay hide animation started (iOS drawer style)');
     }
     
     startProgressBar(durationMs, linkElement) {
         const progressElement = this.overlayElement.querySelector('[data-next-redirect-progress]');
+        const countElement = this.overlayElement.querySelector('[data-next-redirect-count]');
         
         if (!progressElement) {
-            console.log('No progress bar found with [data-next-redirect-progress]');
             return;
         }
         
-        // Всегда сбрасываем прогресс-бар до 0
+        // Always reset progress bar to 0
         progressElement.style.width = '0%';
-        progressElement.style.transition = 'none'; // Отключаем CSS transitions
+        progressElement.style.transition = 'none'; // Disable CSS transitions
         
-        // Небольшая задержка перед началом анимации
+        // Setup countdown
+        const totalSeconds = Math.ceil(durationMs / 1000);
+        let remainingSeconds = totalSeconds;
+        
+        // Update counter
+        const updateCountdown = () => {
+            if (countElement) {
+                countElement.textContent = `${remainingSeconds}S`;
+            }
+            remainingSeconds--;
+        };
+        
+        // Show initial value
+        updateCountdown();
+        
+        // Start countdown every second
+        const countdownInterval = setInterval(() => {
+            updateCountdown();
+            if (remainingSeconds < 0) {
+                clearInterval(countdownInterval);
+            }
+        }, 1000);
+        
+        // Small delay before starting animation
         this.progressTimer = setTimeout(() => {
-            // Включаем плавную анимацию
+            // Enable smooth animation
             progressElement.style.transition = `width ${durationMs}ms linear`;
             progressElement.style.width = '100%';
             
-            // Таймер для редиректа
+            // Timer for redirect
             this.progressTimer = setTimeout(() => {
-                console.log('Progress bar completed - redirecting...');
+                clearInterval(countdownInterval);
                 if (linkElement && linkElement.href) {
                     window.location.href = linkElement.href;
                 }
             }, durationMs);
         }, 100);
-        
-        console.log(`Progress bar started for ${durationMs}ms`);
     }
     
-    // ВРЕМЕННО: Метод для тестирования - принудительно показать оверлей
+    // TEMPORARY: Method for testing - force show overlay
     testShowOverlay() {
-        console.log('Testing overlay display...');
-        
-        // Находим первую сессию для тестирования
+        // Find first session for testing
         const firstSession = document.querySelector('[data-agenda-item]');
         if (firstSession) {
             this.showOverlay(firstSession);
-        } else {
-            console.log('No sessions found for testing');
         }
     }
     
     hideOverlay() {
         if (this.overlayElement) {
             this.overlayElement.style.display = 'none';
-            const displayTime = parseInt(this.overlayElement.getAttribute('data-next-redirect')) || 15;
-            console.log(`Overlay hidden after ${displayTime} seconds`);
         }
         
-        // Очищаем все таймеры
+        // Clear all timers
         if (this.currentTimer) {
             clearTimeout(this.currentTimer);
             this.currentTimer = null;
@@ -284,12 +283,12 @@ class NextSessionOverlayManager {
     }
 }
 
-// Инициализация
+// Initialize
 document.addEventListener('DOMContentLoaded', () => {
     window.nextSessionOverlayManager = new NextSessionOverlayManager();
 });
 
-// Также инициализируем если скрипт загружается после DOM
+// Also initialize if script loads after DOM
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         if (!window.nextSessionOverlayManager) {
