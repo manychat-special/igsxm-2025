@@ -48,13 +48,47 @@ class NextSessionOverlayManager {
             
             // Если разница меньше 5 секунд (сессия только что закончилась)
             if (timeDiff <= 5000) {
-                this.showOverlay();
+                this.showOverlay(sessionElement);
             }
         });
     }
     
-    showOverlay() {
+    getNextSession(currentSessionElement) {
+        // Получаем все сессии на странице
+        const allSessions = document.querySelectorAll('[data-agenda-item]');
+        const sessions = Array.from(allSessions).map(el => ({
+            element: el,
+            slug: el.getAttribute('data-agenda-item'),
+            startTime: new Date(el.getAttribute('data-start-time'))
+        }));
+        
+        // Сортируем по времени начала
+        sessions.sort((a, b) => a.startTime - b.startTime);
+        
+        // Находим индекс текущей сессии
+        const currentIndex = sessions.findIndex(s => s.element === currentSessionElement);
+        
+        // Возвращаем следующую сессию (если есть)
+        return sessions[currentIndex + 1] || null;
+    }
+    
+    showOverlay(currentSessionElement) {
         if (!this.overlayElement) return;
+        
+        // Находим следующую сессию
+        const nextSession = this.getNextSession(currentSessionElement);
+        
+        if (!nextSession) {
+            console.log('No next session found, hiding overlay');
+            return;
+        }
+        
+        // Настраиваем ссылку
+        const linkElement = this.overlayElement.querySelector('[data-next-redirect-link]');
+        if (linkElement) {
+            linkElement.href = `/${nextSession.slug}`;
+            console.log(`Next session link set to: /${nextSession.slug}`);
+        }
         
         // Скрываем оверлей
         this.overlayElement.style.display = 'none';
