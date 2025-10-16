@@ -91,8 +91,8 @@ class NextSessionOverlayManager {
                 return false;
             }
             
-            // Must not have started yet or just started (within 5 seconds)
-            return session.startTime > now || Math.abs(session.startTime - now) <= 5000;
+            // Accept any session that starts at the right time (past, present, or future)
+            return true;
         });
         
         // Sort by start time and return the earliest one
