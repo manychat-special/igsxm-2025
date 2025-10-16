@@ -8,6 +8,7 @@ class NextSessionOverlayManager {
         this.currentTimer = null;
         this.checkInterval = null;
         this.progressTimer = null; // Progress bar timer
+        this.shownSessions = new Set(); // Track shown sessions to prevent duplicates
         
         this.init();
     }
@@ -23,7 +24,7 @@ class NextSessionOverlayManager {
         // Hide overlay initially
         this.overlayElement.style.display = 'none';
         
-        // Start checking every 5 seconds
+        // Start checking every 30 seconds
         this.startChecking();
         
         // TEMPORARY: Show overlay immediately for testing
@@ -35,7 +36,7 @@ class NextSessionOverlayManager {
     startChecking() {
         this.checkInterval = setInterval(() => {
             this.checkForSessionEnd();
-        }, 5000);
+        }, 30000);
     }
     
     checkForSessionEnd() {
@@ -53,7 +54,11 @@ class NextSessionOverlayManager {
             
             // If difference is less than 5 seconds (session just ended)
             if (timeDiff <= 5000) {
-                this.showOverlay(sessionElement);
+                const sessionId = sessionElement.getAttribute('data-agenda-item');
+                if (!this.shownSessions.has(sessionId)) {
+                    this.shownSessions.add(sessionId);
+                    this.showOverlay(sessionElement);
+                }
             }
         });
     }
