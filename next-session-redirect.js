@@ -132,24 +132,22 @@ class NextSessionOverlayManager {
             return;
         }
         
-        // Устанавливаем начальное состояние
+        // Устанавливаем начальное состояние (iOS drawer стиль)
         gsap.set(this.overlayElement, {
-            y: 100,
-            opacity: 0,
-            scale: 0.9
+            y: '100%', // Полностью ниже экрана
+            scale: 0.95 // Легкое уменьшение для эффекта глубины
         });
         
-        // Анимация появления снизу с баунсом
+        // Анимация появления снизу (iOS drawer стиль)
         gsap.to(this.overlayElement, {
-            y: 0,
-            opacity: 1,
+            y: '0%',
             scale: 1,
-            duration: 0.6,
-            ease: "back.out(1.7)",
+            duration: 0.5,
+            ease: "power2.out",
             delay: 0.1
         });
         
-        console.log('Overlay animation started');
+        console.log('Overlay animation started (iOS drawer style)');
     }
     
     setupCancelButton() {
@@ -180,11 +178,10 @@ class NextSessionOverlayManager {
             return;
         }
         
-        // Анимация скрытия вниз
+        // Анимация скрытия вниз (iOS drawer стиль)
         gsap.to(this.overlayElement, {
-            y: 100,
-            opacity: 0,
-            scale: 0.9,
+            y: '100%', // Полностью уходит вниз
+            scale: 0.95, // Легкое уменьшение
             duration: 0.4,
             ease: "power2.in",
             onComplete: () => {
@@ -192,7 +189,7 @@ class NextSessionOverlayManager {
             }
         });
         
-        console.log('Overlay hide animation started');
+        console.log('Overlay hide animation started (iOS drawer style)');
     }
     
     startProgressBar(durationMs, linkElement) {
