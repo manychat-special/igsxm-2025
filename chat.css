@@ -276,8 +276,10 @@ background-color: var(--ht-color-accent-15);
    REACTIONS
    ======================================== */
 
+   
 .reaction {
   border-radius: 1000px;
+  padding: 8px 14px;
   font-size: 1em;
   font-family: 'CoFo Sans Mono';
   text-transform: uppercase;
@@ -289,9 +291,17 @@ background-color: var(--ht-color-accent-15);
 }
 
 .reaction.reacted:before {
-  background-color: var(--ht-color-accent-15);
+  background-color: var(--ht-color-accent-35);
 }
 
 .reaction:focus {
   outline: none;
+}
+
+.reactions-wrap {
+  text-align: left;
+}
+
+.reactions-title {
+  margin-bottom: 16px;
 }
