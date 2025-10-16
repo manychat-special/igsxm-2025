@@ -336,9 +336,7 @@ class AdditionalSessionOverlayManager {
         this.sessionEndedOverlay = null;
         this.sessionOndemandOverlay = null;
         this.checkInterval = null;
-        this.currentSession = null;
-        this.shownSessionEnded = false;
-        this.shownOndemand = false;
+        this.shownSessions = new Set(); // Track shown sessions to prevent duplicates
         
         this.init();
     }
@@ -352,73 +350,55 @@ class AdditionalSessionOverlayManager {
             return;
         }
         
-        // Find current session
-        this.currentSession = this.findCurrentSession();
-        if (!this.currentSession) return;
-        
-        // Start checking every 30 seconds
+        // Start checking every 10 seconds (same as original)
         this.startChecking();
     }
     
     startChecking() {
         this.checkInterval = setInterval(() => {
             this.checkForSessionEnd();
-        }, 30000);
-        
-        // Check immediately
-        this.checkForSessionEnd();
+        }, 10000);
     }
     
     checkForSessionEnd() {
-        if (!this.currentSession) return;
-        
-        const endTime = new Date(this.currentSession.getAttribute('data-end-time'));
         const now = new Date();
-        const timeSinceEnd = now.getTime() - endTime.getTime();
         
-        // Check session-ended overlay (1 minute after session ends)
-        if (this.sessionEndedOverlay && !this.shownSessionEnded && timeSinceEnd >= 60000) {
-            this.sessionEndedOverlay.style.visibility = 'visible';
-            this.shownSessionEnded = true;
-        }
+        // Find all sessions on page (same as original)
+        const sessions = document.querySelectorAll('[data-agenda-item]');
         
-        // Check ondemand overlay
-        if (this.sessionOndemandOverlay && !this.shownOndemand) {
-            const ondemandDelay = this.sessionOndemandOverlay.getAttribute('data-session-ondemand');
-            if (ondemandDelay) {
-                const delayMinutes = parseInt(ondemandDelay);
-                if (!isNaN(delayMinutes)) {
-                    const delayMs = delayMinutes * 60 * 1000;
-                    if (timeSinceEnd >= delayMs) {
-                        this.sessionOndemandOverlay.style.visibility = 'visible';
-                        this.shownOndemand = true;
+        sessions.forEach(sessionElement => {
+            const endTimeStr = sessionElement.getAttribute('data-end-time');
+            if (!endTimeStr) return;
+            
+            const endTime = new Date(endTimeStr);
+            const timeSinceEnd = now.getTime() - endTime.getTime();
+            const sessionId = sessionElement.getAttribute('data-agenda-item');
+            
+            // Check session-ended overlay (1 minute after session ends)
+            if (this.sessionEndedOverlay && timeSinceEnd >= 60000 && timeSinceEnd <= 70000) {
+                if (!this.shownSessions.has(sessionId + '-ended')) {
+                    this.shownSessions.add(sessionId + '-ended');
+                    this.sessionEndedOverlay.style.visibility = 'visible';
+                }
+            }
+            
+            // Check ondemand overlay
+            if (this.sessionOndemandOverlay) {
+                const ondemandDelay = this.sessionOndemandOverlay.getAttribute('data-session-ondemand');
+                if (ondemandDelay) {
+                    const delayMinutes = parseInt(ondemandDelay);
+                    if (!isNaN(delayMinutes)) {
+                        const delayMs = delayMinutes * 60 * 1000;
+                        if (timeSinceEnd >= delayMs && timeSinceEnd <= delayMs + 10000) {
+                            if (!this.shownSessions.has(sessionId + '-ondemand')) {
+                                this.shownSessions.add(sessionId + '-ondemand');
+                                this.sessionOndemandOverlay.style.visibility = 'visible';
+                            }
+                        }
                     }
                 }
             }
-        }
-    }
-    
-    findCurrentSession() {
-        const now = new Date();
-        const sessions = document.querySelectorAll('[data-agenda-item]');
-        
-        for (let session of sessions) {
-            const startTime = new Date(session.getAttribute('data-start-time'));
-            const endTime = new Date(session.getAttribute('data-end-time'));
-            
-            // If current time is within this session's timeframe
-            if (now >= startTime && now <= endTime) {
-                return session;
-            }
-            
-            // If session just ended (within last 30 minutes)
-            const timeSinceEnd = now.getTime() - endTime.getTime();
-            if (timeSinceEnd > 0 && timeSinceEnd <= 1800000) { // 30 minutes
-                return session;
-            }
-        }
-        
-        return null;
+        });
     }
     
     destroy() {
