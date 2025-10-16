@@ -65,6 +65,7 @@ class NextSessionOverlayManager {
         const sessions = Array.from(allSessions).map(el => ({
             element: el,
             slug: el.getAttribute('data-agenda-item'),
+            title: el.getAttribute('data-agenda-title') || 'Untitled Session', // Получаем название сессии
             startTime: new Date(el.getAttribute('data-start-time'))
         }));
         
@@ -84,10 +85,13 @@ class NextSessionOverlayManager {
         // Находим следующую сессию
         const nextSession = this.getNextSession(currentSessionElement);
         
-        // Настраиваем ссылку только если есть следующая сессия
+        // Настраиваем ссылку и название только если есть следующая сессия
         const linkElement = this.overlayElement.querySelector('[data-next-redirect-link]');
-        if (linkElement) {
-            if (nextSession) {
+        const titleElement = this.overlayElement.querySelector('[data-next-redirect-title]');
+        
+        if (nextSession) {
+            // Настраиваем ссылку
+            if (linkElement) {
                 // Берем текущий URL и заменяем только slug в конце
                 const currentUrl = window.location.href;
                 const urlParts = currentUrl.split('/');
@@ -97,10 +101,23 @@ class NextSessionOverlayManager {
                 linkElement.href = newUrl;
                 linkElement.style.display = '';
                 console.log(`Next session link set to: ${newUrl}`);
-            } else {
-                linkElement.style.display = 'none';
-                console.log('No next session found, hiding link');
             }
+            
+            // Настраиваем название
+            if (titleElement) {
+                titleElement.textContent = nextSession.title;
+                titleElement.style.display = '';
+                console.log(`Next session title set to: ${nextSession.title}`);
+            }
+        } else {
+            // Скрываем элементы если нет следующей сессии
+            if (linkElement) {
+                linkElement.style.display = 'none';
+            }
+            if (titleElement) {
+                titleElement.style.display = 'none';
+            }
+            console.log('No next session found, hiding link and title');
         }
         
         // Скрываем оверлей
