@@ -322,12 +322,8 @@ background-color: var(--ht-color-accent-15);
    ======================================== */
 
 .comments-note {
-  margin-top: 8px;
-  margin-bottom: 0px;
+  margin-top: 3px;
+  margin-bottom: -8px;
   font-size: 0.75em;
   color:rgba(255, 255, 255, 0.5)
-}
-
-.comment-content {
-  margin: 0px
 }
