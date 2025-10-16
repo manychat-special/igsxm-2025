@@ -27,9 +27,9 @@ class NextSessionOverlayManager {
         this.startChecking();
         
         // TEMPORARY: Show overlay immediately for testing
-        setTimeout(() => {
-            this.testShowOverlay();
-        }, 2000);
+        // setTimeout(() => {
+        //     this.testShowOverlay();
+        // }, 2000);
     }
     
     startChecking() {
