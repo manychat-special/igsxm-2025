@@ -108,16 +108,80 @@ class NextSessionOverlayManager {
         // Показываем оверлей
         this.overlayElement.style.display = 'block';
         
+        // Анимация появления снизу с баунсом через GSAP
+        this.animateOverlayIn();
+        
         // Получаем время показа из атрибута data-next-redirect (по умолчанию 15 секунд)
         const displayTime = parseInt(this.overlayElement.getAttribute('data-next-redirect')) || 15;
         const displayTimeMs = displayTime * 1000;
         
         console.log(`Overlay shown - session ended, will hide in ${displayTime} seconds`);
         
-        // ВРЕМЕННО ОТКЛЮЧЕНО: Автоматически скрываем через указанное время
-        // this.currentTimer = setTimeout(() => {
-        //     this.hideOverlay();
-        // }, displayTimeMs);
+        // Запускаем прогресс-бар и автоматический редирект
+        this.startProgressBar(displayTimeMs, linkElement);
+    }
+    
+    animateOverlayIn() {
+        // Проверяем, что GSAP доступен
+        if (typeof gsap === 'undefined') {
+            console.log('GSAP not available, skipping animation');
+            return;
+        }
+        
+        // Устанавливаем начальное состояние
+        gsap.set(this.overlayElement, {
+            y: 100,
+            opacity: 0,
+            scale: 0.9
+        });
+        
+        // Анимация появления снизу с баунсом
+        gsap.to(this.overlayElement, {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 0.6,
+            ease: "back.out(1.7)",
+            delay: 0.1
+        });
+        
+        console.log('Overlay animation started');
+    }
+    
+    startProgressBar(durationMs, linkElement) {
+        const progressElement = this.overlayElement.querySelector('[data-next-redirect-progress]');
+        
+        if (!progressElement) {
+            console.log('No progress bar found with [data-next-redirect-progress]');
+            return;
+        }
+        
+        // Сбрасываем прогресс-бар
+        progressElement.style.width = '0%';
+        
+        // Анимация прогресс-бара через requestAnimationFrame (более плавная для прогресс-бара)
+        const startTime = Date.now();
+        const animate = () => {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min((elapsed / durationMs) * 100, 100);
+            
+            progressElement.style.width = `${progress}%`;
+            
+            if (progress < 100) {
+                requestAnimationFrame(animate);
+            } else {
+                // Прогресс-бар достиг 100% - делаем редирект
+                console.log('Progress bar completed - redirecting...');
+                if (linkElement && linkElement.href) {
+                    window.location.href = linkElement.href;
+                }
+            }
+        };
+        
+        // Запускаем анимацию
+        requestAnimationFrame(animate);
+        
+        console.log(`Progress bar started for ${durationMs}ms`);
     }
     
     // ВРЕМЕННО: Метод для тестирования - принудительно показать оверлей
