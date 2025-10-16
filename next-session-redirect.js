@@ -78,15 +78,15 @@ class NextSessionOverlayManager {
         const endedTime = endedSession.endTime;
         const now = new Date();
         
-        // Find sessions that start after the ended session's end time
+        // Find sessions that start exactly at the ended session's end time
         const futureSessions = sessions.filter(session => {
             // Skip the same session element
             if (session.element === endedSessionElement) {
                 return false;
             }
             
-            // Must start at or after the ended session's end time
-            if (session.startTime < endedTime) {
+            // Must start exactly at the ended session's end time
+            if (session.startTime.getTime() !== endedTime.getTime()) {
                 return false;
             }
             
@@ -106,36 +106,31 @@ class NextSessionOverlayManager {
         // Find next session
         const nextSession = this.getNextSession(endedSessionElement);
         
-        // Setup link and title only if next session exists
+        // If no next session found, don't show overlay at all
+        if (!nextSession) {
+            return;
+        }
+        
+        // Setup link and title
         const linkElement = this.overlayElement.querySelector('[data-next-redirect-link]');
         const titleElement = this.overlayElement.querySelector('[data-next-redirect-title]');
         
-        if (nextSession) {
-            // Setup link
-            if (linkElement) {
-                // Get current URL and replace only slug at the end
-                const currentUrl = window.location.href;
-                const urlParts = currentUrl.split('/');
-                urlParts[urlParts.length - 1] = nextSession.slug;
-                const newUrl = urlParts.join('/');
-                
-                linkElement.href = newUrl;
-                linkElement.style.display = '';
-            }
+        // Setup link
+        if (linkElement) {
+            // Get current URL and replace only slug at the end
+            const currentUrl = window.location.href;
+            const urlParts = currentUrl.split('/');
+            urlParts[urlParts.length - 1] = nextSession.slug;
+            const newUrl = urlParts.join('/');
             
-            // Setup title
-            if (titleElement) {
-                titleElement.textContent = nextSession.title;
-                titleElement.style.display = '';
-            }
-        } else {
-            // Hide elements if no next session
-            if (linkElement) {
-                linkElement.style.display = 'none';
-            }
-            if (titleElement) {
-                titleElement.style.display = 'none';
-            }
+            linkElement.href = newUrl;
+            linkElement.style.display = '';
+        }
+        
+        // Setup title
+        if (titleElement) {
+            titleElement.textContent = nextSession.title;
+            titleElement.style.display = '';
         }
         
         // Hide overlay
