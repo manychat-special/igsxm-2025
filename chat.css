@@ -271,3 +271,27 @@ background-color: var(--ht-color-accent-15);
   padding: 4px 8px;
   border-radius: 0px;
 }
+
+/* ========================================
+   REACTIONS
+   ======================================== */
+
+.reaction {
+  border-radius: 1000px;
+  font-size: 1em;
+  font-family: 'CoFo Sans Mono';
+  text-transform: uppercase;
+  color: var(--ht-color-accent);
+}
+
+.reaction.reacted {
+  color: var(--ht-color-accent);
+}
+
+.reaction.reacted:before {
+  background-color: var(--ht-color-accent-15);
+}
+
+.reaction:focus {
+  outline: none;
+}
