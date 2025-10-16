@@ -1,192 +1,99 @@
 /**
- * Next Session Overlay Manager
- * Независимый скрипт для управления оверлеями следующих сессий
+ * Simple Next Session Overlay Manager
+ * Простой скрипт для показа оверлея когда сессия заканчивается
  */
 class NextSessionOverlayManager {
     constructor() {
-        this.activeOverlays = new Map(); // sessionId -> overlay data
-        this.countdownTimers = new Map(); // sessionId -> timer
-        this.sessionManager = null;
+        this.overlayElement = null;
+        this.currentTimer = null;
+        this.checkInterval = null;
         
         this.init();
     }
     
     init() {
-        // Ждем, пока SessionVisibilityManager будет готов
-        this.waitForSessionManager();
-    }
-    
-    waitForSessionManager() {
-        if (window.sessionManager) {
-            this.sessionManager = window.sessionManager;
-            this.setupEventListeners();
-        } else {
-            // Проверяем каждые 100мс
-            setTimeout(() => this.waitForSessionManager(), 100);
-        }
-    }
-    
-    setupEventListeners() {
-        // Слушаем изменения состояния сессий
-        const originalUpdateSessionVisibility = this.sessionManager.updateSessionVisibility.bind(this.sessionManager);
+        // Находим оверлей на странице
+        this.overlayElement = document.querySelector('[data-next-redirect]');
         
-        this.sessionManager.updateSessionVisibility = (session) => {
-            // Вызываем оригинальный метод
-            originalUpdateSessionVisibility(session);
-            
-            // Добавляем нашу логику
-            this.handleSessionStateChange(session);
-        };
-    }
-    
-    handleSessionStateChange(session) {
-        const sessionId = session.element.getAttribute('data-agenda-item');
-        const currentState = this.sessionManager.getCurrentState(session.element);
-        const previousState = session.element.getAttribute('data-previous-state');
-        
-        // Проверяем, изменилось ли состояние с 'during' на 'after'
-        if (previousState === 'during' && currentState === 'after') {
-            this.showOverlayForSession(session);
-        }
-        
-        // Сохраняем текущее состояние
-        session.element.setAttribute('data-previous-state', currentState);
-    }
-    
-    showOverlayForSession(session) {
-        const sessionId = session.element.getAttribute('data-agenda-item');
-        const overlayElement = session.element.querySelector('[data-next-redirect]');
-        
-        // Проверяем, включен ли оверлей для этой сессии
-        if (!overlayElement) {
+        if (!this.overlayElement) {
+            console.log('No overlay element found with [data-next-redirect]');
             return;
         }
         
-        // Получаем доступные следующие сессии
-        const nextSessions = this.getAvailableNextSessions(session);
+        // Скрываем оверлей изначально
+        this.overlayElement.style.display = 'none';
         
-        if (nextSessions.length === 0) {
-            console.log('No next sessions available for', sessionId);
-            return;
-        }
-        
-        // Случайный выбор
-        const randomSession = nextSessions[Math.floor(Math.random() * nextSessions.length)];
-        
-        console.log('Showing overlay for', sessionId, '->', randomSession.element.getAttribute('data-agenda-item'));
-        
-        // Настраиваем оверлей
-        this.setupOverlay(session, randomSession, overlayElement);
+        // Начинаем проверку каждые 5 секунд
+        this.startChecking();
     }
     
-    getAvailableNextSessions(currentSession) {
+    startChecking() {
+        this.checkInterval = setInterval(() => {
+            this.checkForSessionEnd();
+        }, 5000);
+    }
+    
+    checkForSessionEnd() {
         const now = new Date();
-        return this.sessionManager.sessions.filter(session => {
-            // Исключаем текущую сессию
-            if (session === currentSession) return false;
+        
+        // Ищем все сессии на странице
+        const sessions = document.querySelectorAll('[data-agenda-item]');
+        
+        sessions.forEach(sessionElement => {
+            const endTimeStr = sessionElement.getAttribute('data-end-time');
+            if (!endTimeStr) return;
             
-            // Только сессии, которые еще не начались или начались недавно
-            const timeDiff = session.startTime.getTime() - now.getTime();
-            return timeDiff >= 0 || timeDiff >= -300000; // 5 минут буфер
+            const endTime = new Date(endTimeStr);
+            const timeDiff = Math.abs(now.getTime() - endTime.getTime());
+            
+            // Если разница меньше 5 секунд (сессия только что закончилась)
+            if (timeDiff <= 5000) {
+                this.showOverlay();
+            }
         });
     }
     
-    setupOverlay(currentSession, nextSession, overlayElement) {
-        const sessionId = currentSession.element.getAttribute('data-agenda-item');
-        const linkElement = overlayElement.querySelector('[data-next-redirect-link]');
-        const cancelButton = overlayElement.querySelector('[data-next-redirect-cancel]');
+    showOverlay() {
+        if (!this.overlayElement) return;
         
-        // Сначала скрываем оверлей
-        overlayElement.style.display = 'none';
-        
-        // Настраиваем ссылку
-        const nextSessionLink = nextSession.element.querySelector('a');
-        if (nextSessionLink) {
-            linkElement.href = nextSessionLink.href;
-            linkElement.textContent = `Перейти к "${nextSessionLink.textContent.trim()}"`;
-        }
+        // Скрываем оверлей
+        this.overlayElement.style.display = 'none';
         
         // Показываем оверлей
-        overlayElement.style.display = 'block';
+        this.overlayElement.style.display = 'block';
         
-        // Обработчик отмены
-        cancelButton.onclick = () => this.cancelOverlay(sessionId);
+        // Получаем время показа из атрибута data-next-redirect (по умолчанию 15 секунд)
+        const displayTime = parseInt(this.overlayElement.getAttribute('data-next-redirect')) || 15;
+        const displayTimeMs = displayTime * 1000;
         
-        // Сохраняем данные оверлея
-        this.activeOverlays.set(sessionId, {
-            element: overlayElement,
-            nextSession: nextSession
-        });
+        console.log(`Overlay shown - session ended, will hide in ${displayTime} seconds`);
         
-        console.log('Overlay shown for session:', sessionId, '-> next session:', nextSession.element.getAttribute('data-agenda-item'));
+        // Автоматически скрываем через указанное время
+        this.currentTimer = setTimeout(() => {
+            this.hideOverlay();
+        }, displayTimeMs);
     }
     
-    // startCountdown - временно отключен для тестирования
-    // startCountdown(session, countdownElement) {
-    //     const sessionId = session.element.getAttribute('data-agenda-item');
-    //     const overlayElement = session.element.querySelector('[data-next-redirect]');
-    //     const countdownTime = parseInt(overlayElement.getAttribute('data-next-redirect') || '15');
-    //     let remaining = countdownTime;
-    //     
-    //     countdownElement.textContent = remaining;
-    //     
-    //     const timer = setInterval(() => {
-    //         remaining--;
-    //         countdownElement.textContent = remaining;
-    //         
-    //         if (remaining <= 0) {
-    //             clearInterval(timer);
-    //             this.redirectToNextSession(sessionId);
-    //         }
-    //     }, 1000);
-    //     
-    //     this.countdownTimers.set(sessionId, timer);
-    // }
-    
-    cancelOverlay(sessionId) {
-        const overlayData = this.activeOverlays.get(sessionId);
-        if (overlayData) {
-            overlayData.element.style.display = 'none';
-            this.activeOverlays.delete(sessionId);
-            console.log('Overlay cancelled for session:', sessionId);
+    hideOverlay() {
+        if (this.overlayElement) {
+            this.overlayElement.style.display = 'none';
+            const displayTime = parseInt(this.overlayElement.getAttribute('data-next-redirect')) || 15;
+            console.log(`Overlay hidden after ${displayTime} seconds`);
         }
         
-        // Очищаем таймеры если есть
-        if (this.countdownTimers.has(sessionId)) {
-            clearInterval(this.countdownTimers.get(sessionId));
-            this.countdownTimers.delete(sessionId);
-        }
-    }
-    
-    redirectToNextSession(sessionId) {
-        const overlayData = this.activeOverlays.get(sessionId);
-        if (overlayData && overlayData.nextSession) {
-            const nextSessionLink = overlayData.nextSession.element.querySelector('a');
-            if (nextSessionLink) {
-                window.location.href = nextSessionLink.href;
-            }
-        }
-    }
-    
-    // Публичные методы для тестирования
-    getActiveOverlays() {
-        return Array.from(this.activeOverlays.keys());
-    }
-    
-    forceShowOverlay(sessionId) {
-        const session = this.sessionManager.sessions.find(s => 
-            s.element.getAttribute('data-agenda-item') === sessionId
-        );
-        if (session) {
-            this.showOverlayForSession(session);
+        if (this.currentTimer) {
+            clearTimeout(this.currentTimer);
+            this.currentTimer = null;
         }
     }
     
     destroy() {
-        // Очищаем все таймеры
-        this.countdownTimers.forEach(timer => clearInterval(timer));
-        this.countdownTimers.clear();
-        this.activeOverlays.clear();
+        if (this.checkInterval) {
+            clearInterval(this.checkInterval);
+        }
+        if (this.currentTimer) {
+            clearTimeout(this.currentTimer);
+        }
     }
 }
 
