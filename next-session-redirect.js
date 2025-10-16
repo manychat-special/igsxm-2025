@@ -7,6 +7,7 @@ class NextSessionOverlayManager {
         this.overlayElement = null;
         this.currentTimer = null;
         this.checkInterval = null;
+        this.progressTimer = null; // Таймер для прогресс-бара
         
         this.init();
     }
@@ -108,6 +109,9 @@ class NextSessionOverlayManager {
         // Показываем оверлей
         this.overlayElement.style.display = 'block';
         
+        // Настраиваем кнопку отмены
+        this.setupCancelButton();
+        
         // Анимация появления снизу с баунсом через GSAP
         this.animateOverlayIn();
         
@@ -148,6 +152,49 @@ class NextSessionOverlayManager {
         console.log('Overlay animation started');
     }
     
+    setupCancelButton() {
+        const cancelButton = this.overlayElement.querySelector('[data-next-redirect-cancel]');
+        
+        if (!cancelButton) {
+            console.log('No cancel button found with [data-next-redirect-cancel]');
+            return;
+        }
+        
+        // Удаляем предыдущие обработчики
+        cancelButton.onclick = null;
+        
+        // Добавляем новый обработчик
+        cancelButton.onclick = () => {
+            console.log('Cancel button clicked - hiding overlay');
+            this.hideOverlayWithAnimation();
+        };
+        
+        console.log('Cancel button setup complete');
+    }
+    
+    hideOverlayWithAnimation() {
+        // Проверяем, что GSAP доступен
+        if (typeof gsap === 'undefined') {
+            console.log('GSAP not available, hiding overlay without animation');
+            this.hideOverlay();
+            return;
+        }
+        
+        // Анимация скрытия вниз
+        gsap.to(this.overlayElement, {
+            y: 100,
+            opacity: 0,
+            scale: 0.9,
+            duration: 0.4,
+            ease: "power2.in",
+            onComplete: () => {
+                this.hideOverlay();
+            }
+        });
+        
+        console.log('Overlay hide animation started');
+    }
+    
     startProgressBar(durationMs, linkElement) {
         const progressElement = this.overlayElement.querySelector('[data-next-redirect-progress]');
         
@@ -156,30 +203,24 @@ class NextSessionOverlayManager {
             return;
         }
         
-        // Сбрасываем прогресс-бар
+        // Всегда сбрасываем прогресс-бар до 0
         progressElement.style.width = '0%';
+        progressElement.style.transition = 'none'; // Отключаем CSS transitions
         
-        // Анимация прогресс-бара через requestAnimationFrame (более плавная для прогресс-бара)
-        const startTime = Date.now();
-        const animate = () => {
-            const elapsed = Date.now() - startTime;
-            const progress = Math.min((elapsed / durationMs) * 100, 100);
+        // Небольшая задержка перед началом анимации
+        this.progressTimer = setTimeout(() => {
+            // Включаем плавную анимацию
+            progressElement.style.transition = `width ${durationMs}ms linear`;
+            progressElement.style.width = '100%';
             
-            progressElement.style.width = `${progress}%`;
-            
-            if (progress < 100) {
-                requestAnimationFrame(animate);
-            } else {
-                // Прогресс-бар достиг 100% - делаем редирект
+            // Таймер для редиректа
+            this.progressTimer = setTimeout(() => {
                 console.log('Progress bar completed - redirecting...');
                 if (linkElement && linkElement.href) {
                     window.location.href = linkElement.href;
                 }
-            }
-        };
-        
-        // Запускаем анимацию
-        requestAnimationFrame(animate);
+            }, durationMs);
+        }, 100);
         
         console.log(`Progress bar started for ${durationMs}ms`);
     }
@@ -204,9 +245,15 @@ class NextSessionOverlayManager {
             console.log(`Overlay hidden after ${displayTime} seconds`);
         }
         
+        // Очищаем все таймеры
         if (this.currentTimer) {
             clearTimeout(this.currentTimer);
             this.currentTimer = null;
+        }
+        
+        if (this.progressTimer) {
+            clearTimeout(this.progressTimer);
+            this.progressTimer = null;
         }
     }
     
@@ -216,6 +263,9 @@ class NextSessionOverlayManager {
         }
         if (this.currentTimer) {
             clearTimeout(this.currentTimer);
+        }
+        if (this.progressTimer) {
+            clearTimeout(this.progressTimer);
         }
     }
 }
