@@ -358,6 +358,9 @@ class AdditionalSessionOverlayManager {
         this.checkInterval = setInterval(() => {
             this.checkForSessionEnd();
         }, 10000);
+        
+        // Check immediately when page loads
+        this.checkForSessionEnd();
     }
     
     checkForSessionEnd() {
