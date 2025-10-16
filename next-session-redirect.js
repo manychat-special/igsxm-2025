@@ -1,5 +1,5 @@
 /**
- * Simple Next Session Overlay Manager
+ * Next Session Overlay Manager
  * Shows overlay when session ends and redirects to next session
  */
 class NextSessionOverlayManager {
@@ -74,11 +74,23 @@ class NextSessionOverlayManager {
         
         // Find the session that just ended
         const endedIndex = sessions.findIndex(s => s.element === endedSessionElement);
+        const endedSession = sessions[endedIndex];
         
         // Find the next session that starts after the ended session
         const now = new Date();
         for (let i = endedIndex + 1; i < sessions.length; i++) {
             const session = sessions[i];
+            
+            // Skip sessions with the same start time as the ended session
+            if (session.startTime.getTime() === endedSession.startTime.getTime()) {
+                continue;
+            }
+            
+            // Skip the exact same session element (shouldn't happen, but safety check)
+            if (session.element === endedSessionElement) {
+                continue;
+            }
+            
             // Only return sessions that haven't started yet or just started
             if (session.startTime > now || Math.abs(session.startTime - now) <= 5000) {
                 return session;
