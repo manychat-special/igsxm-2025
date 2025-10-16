@@ -85,8 +85,8 @@ class NextSessionOverlayManager {
                 return false;
             }
             
-            // Must start after the ended session's end time
-            if (session.startTime <= endedTime) {
+            // Must start at or after the ended session's end time
+            if (session.startTime < endedTime) {
                 return false;
             }
             
