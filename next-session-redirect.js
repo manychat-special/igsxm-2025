@@ -24,7 +24,7 @@ class NextSessionOverlayManager {
         // Hide overlay initially
         this.overlayElement.style.display = 'none';
         
-        // Start checking every 30 seconds
+        // Start checking every 10 seconds
         this.startChecking();
         
         // TEMPORARY: Show overlay immediately for testing
@@ -36,7 +36,7 @@ class NextSessionOverlayManager {
     startChecking() {
         this.checkInterval = setInterval(() => {
             this.checkForSessionEnd();
-        }, 30000);
+        }, 10000);
     }
     
     checkForSessionEnd() {
