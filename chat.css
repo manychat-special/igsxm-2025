@@ -304,6 +304,7 @@ background-color: var(--ht-color-accent-15);
   background: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 100%);
   position: sticky;
   top: 0;
+  z-index: 9999;
 }
 
 .reaction img {
