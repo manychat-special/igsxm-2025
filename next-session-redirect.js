@@ -49,19 +49,10 @@ class NextSessionOverlayManager {
             if (!endTimeStr) return;
             
             const endTime = new Date(endTimeStr);
-            const timeDiff = now.getTime() - endTime.getTime();
+            const timeDiff = Math.abs(now.getTime() - endTime.getTime());
             
-            // Debug logging
-            console.log('Session check:', {
-                title: sessionElement.getAttribute('data-agenda-title'),
-                endTime: endTimeStr,
-                timeDiff: timeDiff,
-                shouldShow: timeDiff >= 0 && timeDiff <= 5000
-            });
-            
-            // If session ended within last 5 seconds
-            if (timeDiff >= 0 && timeDiff <= 5000) {
-                console.log('Showing overlay for session:', sessionElement.getAttribute('data-agenda-title'));
+            // If difference is less than 5 seconds (session just ended)
+            if (timeDiff <= 5000) {
                 this.showOverlay(sessionElement);
             }
         });
@@ -81,22 +72,11 @@ class NextSessionOverlayManager {
         // Get the ended session's end time
         const endedSession = sessions.find(s => s.element === endedSessionElement);
         if (!endedSession) {
-            console.log('Ended session not found');
             return null;
         }
         
         const endedTime = endedSession.endTime;
         const now = new Date();
-        
-        console.log('Looking for next session:', {
-            endedSession: endedSession.title,
-            endedTime: endedTime.toISOString(),
-            allSessions: sessions.map(s => ({
-                title: s.title,
-                startTime: s.startTime.toISOString(),
-                endTime: s.endTime.toISOString()
-            }))
-        });
         
         // Find sessions that start exactly at the ended session's end time
         const futureSessions = sessions.filter(session => {
@@ -105,16 +85,15 @@ class NextSessionOverlayManager {
                 return false;
             }
             
-            // Must start exactly at the ended session's end time
-            if (session.startTime.getTime() !== endedTime.getTime()) {
+            // Must start at or very close to the ended session's end time (within 2 minutes)
+            const timeDiff = Math.abs(session.startTime.getTime() - endedTime.getTime());
+            if (timeDiff > 120000) { // 2 minutes in milliseconds
                 return false;
             }
             
             // Must not have started yet or just started (within 5 seconds)
             return session.startTime > now || Math.abs(session.startTime - now) <= 5000;
         });
-        
-        console.log('Found future sessions:', futureSessions.map(s => s.title));
         
         // Sort by start time and return the earliest one
         futureSessions.sort((a, b) => a.startTime - b.startTime);
