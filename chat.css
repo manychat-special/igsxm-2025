@@ -276,6 +276,10 @@ background-color: var(--ht-color-accent-15);
   background-color: var(--ht-color-accent-15);
 }
 
+.notifs-count-tag {
+  background-color: red;
+}
+
 /* ========================================
    REACTIONS
    ======================================== */
