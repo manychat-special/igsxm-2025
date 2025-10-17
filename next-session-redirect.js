@@ -385,17 +385,21 @@ class AdditionalSessionOverlayManager {
                 }
             }
             
-            // Check ondemand overlay (only if session has ended)
-            if (this.sessionOndemandOverlay && timeSinceEnd >= 0) {
+            // Check ondemand overlay (only if session has ended and delay is positive)
+            if (this.sessionOndemandOverlay) {
                 const ondemandDelay = this.sessionOndemandOverlay.getAttribute('data-session-ondemand');
-                if (ondemandDelay) {
+                console.log(`Session ${sessionId}: timeSinceEnd=${timeSinceEnd}, ondemandDelay=${ondemandDelay}`);
+                
+                if (timeSinceEnd > 0 && ondemandDelay) {
                     const delayMinutes = parseInt(ondemandDelay);
-                    if (!isNaN(delayMinutes)) {
+                    if (!isNaN(delayMinutes) && delayMinutes > 0) {
                         const delayMs = delayMinutes * 60 * 1000;
+                        console.log(`Session ${sessionId}: delayMs=${delayMs}, timeSinceEnd >= delayMs: ${timeSinceEnd >= delayMs}`);
                         if (timeSinceEnd >= delayMs) {
                             if (!this.shownSessions.has(sessionId + '-ondemand')) {
                                 this.shownSessions.add(sessionId + '-ondemand');
                                 this.sessionOndemandOverlay.classList.remove('hide');
+                                console.log(`Showing ondemand overlay for session ${sessionId}`);
                             }
                         }
                     }
