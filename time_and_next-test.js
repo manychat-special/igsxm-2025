@@ -24,7 +24,8 @@ document.addEventListener("DOMContentLoaded", function () {
         str.includes("January") || str.includes("February") || str.includes("March") ||
         str.includes("April") || str.includes("May") || str.includes("June") ||
         str.includes("July") || str.includes("August") || str.includes("September")) {
-      const d = new Date(str);
+      // Parse as PDT by adding timezone offset
+      const d = new Date(str + " PDT");
       if (!isNaN(d)) return d;
     }
     
