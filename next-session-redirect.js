@@ -42,25 +42,35 @@ class NextSessionOverlayManager {
     checkForSessionEnd() {
         const now = new Date();
         
-        // Find all sessions on page
-        const sessions = document.querySelectorAll('[data-agenda-item]');
+        // Get current session slug from URL
+        const currentSlug = this.getCurrentSessionSlug();
+        if (!currentSlug) return;
         
-        sessions.forEach(sessionElement => {
-            const endTimeStr = sessionElement.getAttribute('data-end-time');
-            if (!endTimeStr) return;
-            
-            const endTime = new Date(endTimeStr);
-            const timeDiff = Math.abs(now.getTime() - endTime.getTime());
-            
-            // If difference is less than 5 seconds (session just ended)
-            if (timeDiff <= 5000) {
-                const sessionId = sessionElement.getAttribute('data-agenda-item');
-                if (!this.shownSessions.has(sessionId)) {
-                    this.shownSessions.add(sessionId);
-                    this.showOverlay(sessionElement);
-                }
+        // Find the current session element by slug
+        const currentSessionElement = document.querySelector(`[data-agenda-item="${currentSlug}"]`);
+        if (!currentSessionElement) return;
+        
+        const endTimeStr = currentSessionElement.getAttribute('data-end-time');
+        if (!endTimeStr) return;
+        
+        const endTime = new Date(endTimeStr);
+        const timeDiff = Math.abs(now.getTime() - endTime.getTime());
+        
+        // If difference is less than 5 seconds (session just ended)
+        if (timeDiff <= 5000) {
+            const sessionId = currentSessionElement.getAttribute('data-agenda-item');
+            if (!this.shownSessions.has(sessionId)) {
+                this.shownSessions.add(sessionId);
+                this.showOverlay(currentSessionElement);
             }
-        });
+        }
+    }
+    
+    getCurrentSessionSlug() {
+        const url = window.location.href;
+        // Extract slug from URL like: igsummit.manychat.com/virtual/join/sessions/test-session
+        const match = url.match(/\/sessions\/([^\/\?]+)/);
+        return match ? match[1] : null;
     }
     
     getNextSession(endedSessionElement) {
