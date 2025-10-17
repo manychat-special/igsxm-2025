@@ -1,6 +1,7 @@
 /**
- * Upcoming Sessions Manager (UTC comparison version)
+ * Upcoming Sessions Manager (UTC comparison + local display)
  * — сравнивает время в UTC: текущее время vs время сессий (PDT = UTC-7)
+ * — ждёт обработки local-timezone.js для корректного отображения
  * — показывает ближайшие N сессий, которые ещё не начались
  * — работает корректно в любой временной зоне
  */
@@ -66,6 +67,18 @@ class UpcomingSessionsManager {
   }
 
   updateAllContainers() {
+    // Ждём, пока local-timezone.js обработает все элементы
+    const timeElements = document.querySelectorAll('[data-time-copy="start"]');
+    const hasProcessedTimes = timeElements.length > 0 && 
+      Array.from(timeElements).every(el => el.textContent.trim() !== '');
+    
+    if (!hasProcessedTimes) {
+      // Если ещё не обработано, попробовать через 100мс
+      setTimeout(() => this.updateAllContainers(), 100);
+      return;
+    }
+    
+    // Теперь обновляем контейнеры
     this.containers.forEach(c => this.updateContainer(c));
   }
 
