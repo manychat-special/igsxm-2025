@@ -50,13 +50,19 @@ class UpcomingSessionsManager {
             const startTime = session.getAttribute('data-start-time');
             if (!startTime) return false;
             
-            const sessionStartTime = new Date(startTime);
+            const sessionStartTime = window.parseAsPDT 
+                ? window.parseAsPDT(startTime) 
+                : new Date(startTime);
             
             // Show any sessions that haven't started yet
             return sessionStartTime > now;
         }).sort((a, b) => {
-            const aTime = new Date(a.getAttribute('data-start-time'));
-            const bTime = new Date(b.getAttribute('data-start-time'));
+            const aTime = window.parseAsPDT 
+                ? window.parseAsPDT(a.getAttribute('data-start-time')) 
+                : new Date(a.getAttribute('data-start-time'));
+            const bTime = window.parseAsPDT 
+                ? window.parseAsPDT(b.getAttribute('data-start-time')) 
+                : new Date(b.getAttribute('data-start-time'));
             
             return aTime - bTime;
         });
