@@ -1,11 +1,20 @@
 /**
+ * Utility function to get current session slug from URL
+ */
+function getCurrentSessionSlug() {
+    const url = window.location.href;
+    // Extract slug from URL like: igsummit.manychat.com/virtual/join/sessions/test-session
+    const match = url.match(/\/sessions\/([^\/\?]+)/);
+    return match ? match[1] : null;
+}
+
+/**
  * Next Session Overlay Manager
  * Shows overlay when session ends and redirects to next session
  */
 class NextSessionOverlayManager {
     constructor() {
         this.overlayElement = null;
-        this.currentTimer = null;
         this.checkInterval = null;
         this.progressTimer = null; // Progress bar timer
         this.shownSessions = new Set(); // Track shown sessions to prevent duplicates
@@ -27,10 +36,6 @@ class NextSessionOverlayManager {
         // Start checking every 10 seconds
         this.startChecking();
         
-        // TEMPORARY: Show overlay immediately for testing
-        // setTimeout(() => {
-        //     this.testShowOverlay();
-        // }, 2000);
     }
     
     startChecking() {
@@ -43,7 +48,7 @@ class NextSessionOverlayManager {
         const now = new Date();
         
         // Get current session slug from URL
-        const currentSlug = this.getCurrentSessionSlug();
+        const currentSlug = getCurrentSessionSlug();
         if (!currentSlug) return;
         
         // Find the current session element by slug
@@ -268,7 +273,7 @@ class NextSessionOverlayManager {
             progressElement.style.width = '100%';
             
             // Timer for redirect
-            this.progressTimer = setTimeout(() => {
+            setTimeout(() => {
                 clearInterval(countdownInterval);
                 if (linkElement && linkElement.href) {
                     window.location.href = linkElement.href;
@@ -277,14 +282,6 @@ class NextSessionOverlayManager {
         }, 100);
     }
     
-    // TEMPORARY: Method for testing - force show overlay
-    testShowOverlay() {
-        // Find first session for testing
-        const firstSession = document.querySelector('[data-agenda-item]');
-        if (firstSession) {
-            this.showOverlay(firstSession);
-        }
-    }
     
     hideOverlay() {
         if (this.overlayElement) {
@@ -292,11 +289,6 @@ class NextSessionOverlayManager {
         }
         
         // Clear all timers
-        if (this.currentTimer) {
-            clearTimeout(this.currentTimer);
-            this.currentTimer = null;
-        }
-        
         if (this.progressTimer) {
             clearTimeout(this.progressTimer);
             this.progressTimer = null;
@@ -306,9 +298,6 @@ class NextSessionOverlayManager {
     destroy() {
         if (this.checkInterval) {
             clearInterval(this.checkInterval);
-        }
-        if (this.currentTimer) {
-            clearTimeout(this.currentTimer);
         }
         if (this.progressTimer) {
             clearTimeout(this.progressTimer);
@@ -377,7 +366,7 @@ class AdditionalSessionOverlayManager {
         const now = new Date();
         
         // Get current session slug from URL
-        const currentSlug = this.getCurrentSessionSlug();
+        const currentSlug = getCurrentSessionSlug();
         if (!currentSlug) return;
         
         // Find the current session element by slug
