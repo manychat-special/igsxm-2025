@@ -37,17 +37,43 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Timezone abbreviation
   function getUserTzAbbr() {
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const map = {
-      "Asia/Kuala_Lumpur": "MYT", "Asia/Singapore": "SGT", "Asia/Seoul": "KST",
-      "Asia/Tokyo": "JST", "Asia/Hong_Kong": "HKT", "Asia/Shanghai": "CST",
-      "Asia/Bangkok": "ICT", "Asia/Ho_Chi_Minh": "ICT", "Asia/Dubai": "GST",
-      "Asia/Kolkata": "IST", "America/Los_Angeles": "PDT", "America/New_York": "EDT",
-      "America/Chicago": "CDT", "America/Denver": "MDT"
-    };
-    if (map[tz]) return map[tz];
-    const offset = -new Date().getTimezoneOffset()/60;
-    return `GMT${offset>=0?`+${offset}`:offset}`;
+    const tzIana = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    // Europe (DST still active in late Oct)
+    if (tzIana.startsWith("Europe/")) {
+      if (tzIana === "Europe/London" || tzIana === "Europe/Dublin") return "BST";
+      if (tzIana === "Europe/Lisbon") return "WEST";
+      if (tzIana === "Europe/Moscow") return "MSK";
+      if (tzIana === "Atlantic/Reykjavik") return "GMT";
+      return "CEST";
+    }
+
+    // Asia (no DST)
+    if (tzIana === "Asia/Kuala_Lumpur") return "MYT";
+    if (tzIana === "Asia/Singapore") return "SGT";
+    if (tzIana === "Asia/Seoul") return "KST";
+    if (tzIana === "Asia/Tokyo") return "JST";
+    if (tzIana === "Asia/Hong_Kong") return "HKT";
+    if (tzIana === "Asia/Shanghai") return "CST";
+    if (tzIana === "Asia/Bangkok" || tzIana === "Asia/Ho_Chi_Minh") return "ICT";
+    if (tzIana === "Asia/Dubai") return "GST";
+    if (tzIana === "Asia/Kolkata") return "IST";
+
+    // North America (DST active until early Nov)
+    if (tzIana === "America/Los_Angeles") return "PDT";
+    if (tzIana === "America/New_York" || tzIana === "America/Toronto") return "EDT";
+    if (tzIana === "America/Chicago") return "CDT";
+    if (tzIana === "America/Denver") return "MDT";
+
+    // Australia (DST active in some regions)
+    if (tzIana.startsWith("Australia/")) return "AEDT";
+
+    // Fallback: GMT±X (City)
+    const now = new Date();
+    const offset = -now.getTimezoneOffset() / 60;
+    const offsetLabel = `GMT${offset >= 0 ? "+" + offset : offset}`;
+    const city = tzIana.split("/")[1]?.replace("_", " ") || "";
+    return city ? `${offsetLabel} (${city})` : offsetLabel;
   }
 
   /*───────────────────────────────
