@@ -173,9 +173,6 @@ class SessionVisibilityManager {
         if (duringMinutes < 0) {
             // Negative offset - start earlier
             adjustedStartTime = new Date(startTime.getTime() + (duringMinutes * 60 * 1000));
-        } else if (duringMinutes > 0) {
-            // Positive offset - end later
-            adjustedEndTime = new Date(endTime.getTime() + (duringMinutes * 60 * 1000));
         }
         
         // Apply after-session offset
