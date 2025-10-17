@@ -61,12 +61,8 @@ class UpcomingSessionsManager {
 
     // скрываем всё
     sessions.forEach(s => (s.style.display = "none"));
-    // показываем только N ближайших и обновляем время
-    upcoming.slice(0, container.limit).forEach(s => {
-      s.style.display = "";
-      // Обновляем время для этой сессии в локальном формате
-      if (window.renderOne) window.renderOne(s);
-    });
+    // показываем только N ближайших
+    upcoming.slice(0, container.limit).forEach(s => (s.style.display = ""));
   }
 
   updateAllContainers() {
