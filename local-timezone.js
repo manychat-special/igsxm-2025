@@ -73,8 +73,21 @@ document.addEventListener("DOMContentLoaded", function () {
   function renderOne(session) {
     const startAttr = session.getAttribute("data-start-time");
     const endAttr   = session.getAttribute("data-end-time");
-    const start = parseAsPDT(startAttr);
-    const end   = parseAsPDT(endAttr);
+    
+    // Use new Date() for October format, parseAsPDT for YYYY-MM-DD format
+    let start, end;
+    if (startAttr && startAttr.includes('October')) {
+      start = new Date(startAttr);
+    } else {
+      start = parseAsPDT(startAttr);
+    }
+    
+    if (endAttr && endAttr.includes('October')) {
+      end = new Date(endAttr);
+    } else {
+      end = parseAsPDT(endAttr);
+    }
+    
     if (!start || !end) return;
 
     const startTime = start.toLocaleTimeString([], timeFmt);
