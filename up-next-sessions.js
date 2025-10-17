@@ -78,12 +78,7 @@ class UpcomingSessionsManager {
   }
 }
 
-// запуск с ожиданием готовности local-timezone.js
+// запуск
 document.addEventListener("DOMContentLoaded", () => {
-  const waitForParse = setInterval(() => {
-    if (window.parseAsPDT) {
-      window.upcomingManager = new UpcomingSessionsManager();
-      clearInterval(waitForParse);
-    }
-  }, 100);
+  window.upcomingManager = new UpcomingSessionsManager();
 });
