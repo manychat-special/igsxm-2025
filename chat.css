@@ -10,6 +10,12 @@
   display: none;
 }
 
+@media screen and (max-width: 600px) {
+  .rich-editor .comment-buttons .writer-buttons {
+    display: none;
+  }
+}
+
 .user-profile-popup-wrap .section-wrap, .user-profile-popup-wrap .section-selector {
   display: none;
 }
