@@ -50,13 +50,45 @@ class UpcomingSessionsManager {
             const startTime = session.getAttribute('data-start-time');
             if (!startTime) return false;
             
-            const sessionStartTime = new Date(startTime);
+            // Use the same parsing logic as local-timezone.js
+            let sessionStartTime;
+            if (startTime.includes('October')) {
+                // For October format, manually add PDT timezone
+                const isoStart = startTime.replace('October', '2025-10').replace(' AM', '').replace(' PM', '');
+                const [datePart, timePart] = isoStart.split(' ');
+                const [month, day] = datePart.split(' ');
+                const formattedStart = `2025-10-${day.padStart(2, '0')}T${timePart}-07:00`;
+                sessionStartTime = new Date(formattedStart);
+            } else {
+                sessionStartTime = new Date(startTime);
+            }
             
             // Show any sessions that haven't started yet
             return sessionStartTime > now;
         }).sort((a, b) => {
-            const aTime = new Date(a.getAttribute('data-start-time'));
-            const bTime = new Date(b.getAttribute('data-start-time'));
+            const aStartTime = a.getAttribute('data-start-time');
+            const bStartTime = b.getAttribute('data-start-time');
+            
+            let aTime, bTime;
+            if (aStartTime.includes('October')) {
+                const isoA = aStartTime.replace('October', '2025-10').replace(' AM', '').replace(' PM', '');
+                const [datePartA, timePartA] = isoA.split(' ');
+                const [monthA, dayA] = datePartA.split(' ');
+                const formattedA = `2025-10-${dayA.padStart(2, '0')}T${timePartA}-07:00`;
+                aTime = new Date(formattedA);
+            } else {
+                aTime = new Date(aStartTime);
+            }
+            
+            if (bStartTime.includes('October')) {
+                const isoB = bStartTime.replace('October', '2025-10').replace(' AM', '').replace(' PM', '');
+                const [datePartB, timePartB] = isoB.split(' ');
+                const [monthB, dayB] = datePartB.split(' ');
+                const formattedB = `2025-10-${dayB.padStart(2, '0')}T${timePartB}-07:00`;
+                bTime = new Date(formattedB);
+            } else {
+                bTime = new Date(bStartTime);
+            }
             
             return aTime - bTime;
         });
