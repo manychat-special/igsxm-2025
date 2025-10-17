@@ -1,7 +1,8 @@
 /**
- * Upcoming Sessions Manager (PDT comparison version)
- * — сравнивает текущее локальное время, переведённое в PDT (UTC−7)
+ * Upcoming Sessions Manager (UTC comparison version)
+ * — сравнивает время в UTC: текущее время vs время сессий (PDT = UTC-7)
  * — показывает ближайшие N сессий, которые ещё не начались
+ * — работает корректно в любой временной зоне
  */
 
 class UpcomingSessionsManager {
@@ -35,37 +36,27 @@ class UpcomingSessionsManager {
     }));
   }
 
-  // переводим локальное время в PDT
-  getNowInPDT() {
-    const now = new Date();
-    const utc = now.getTime() + now.getTimezoneOffset() * 60000;
-    // PDT = UTC−7 => -7 * 60 * 60 * 1000
-    return new Date(utc - 7 * 60 * 60 * 1000);
-  }
-
-  parseSessionTime(str) {
-    // используем уже существующую функцию, если она есть
-    if (window.parseAsPDT) return window.parseAsPDT(str);
-    // иначе парсим ISO с фиксированным смещением -07:00
-    if (!str) return null;
-    let iso = str.includes("T") ? str : str.replace(" ", "T");
-    if (!/[Zz]|[+\-]\d{2}:?\d{2}$/.test(iso)) iso += "-07:00";
-    const d = new Date(iso);
-    return isNaN(d) ? null : d;
+  // Парсим время сессии в UTC timestamp (PDT = UTC-7)
+  parseTimeToUTC(timeStr) {
+    if (!timeStr) return null;
+    // Добавляем PDT timezone: "2025-10-17 5:40" → "2025-10-17T5:40-07:00"
+    const iso = timeStr.replace(" ", "T") + "-07:00";
+    const date = new Date(iso);
+    return isNaN(date) ? null : date.getTime(); // возвращаем UTC timestamp
   }
 
   updateContainer(container) {
     const sessions = Array.from(container.el.querySelectorAll("[data-agenda-item]"));
-    const nowPDT = this.getNowInPDT();
+    const nowUTC = new Date().getTime(); // текущее время в UTC
 
     // отфильтруем сессии, которые ещё не начались
     const upcoming = sessions
       .map(s => ({
         el: s,
-        start: this.parseSessionTime(s.getAttribute("data-start-time"))
+        startUTC: this.parseTimeToUTC(s.getAttribute("data-start-time"))
       }))
-      .filter(x => x.start && x.start > nowPDT)
-      .sort((a, b) => a.start - b.start)
+      .filter(x => x.startUTC && x.startUTC > nowUTC)
+      .sort((a, b) => a.startUTC - b.startUTC)
       .map(x => x.el);
 
     // скрываем всё
