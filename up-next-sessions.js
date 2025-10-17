@@ -45,6 +45,7 @@ class UpcomingSessionsManager {
         const now = new Date();
         
         // Filter and sort upcoming sessions
+        // Show any sessions that haven't started yet (no time limit)
         const upcomingSessions = Array.from(sessions).filter(session => {
             const startTime = session.getAttribute('data-start-time');
             if (!startTime) return false;
@@ -53,6 +54,7 @@ class UpcomingSessionsManager {
                 ? window.parseAsPDT(startTime) 
                 : new Date(startTime);
             
+            // Show any sessions that haven't started yet
             return sessionStartTime > now;
         }).sort((a, b) => {
             const aTime = window.parseAsPDT 
