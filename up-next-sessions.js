@@ -40,10 +40,12 @@ class UpcomingSessionsManager {
   // Парсим время сессии в UTC timestamp (PDT = UTC-7)
   parseTimeToUTC(timeStr) {
     if (!timeStr) return null;
-    // Добавляем PDT timezone: "2025-10-17 5:40" → "2025-10-17T5:40-07:00"
-    const iso = timeStr.replace(" ", "T") + "-07:00";
-    const date = new Date(iso);
-    return isNaN(date) ? null : date.getTime(); // возвращаем UTC timestamp
+    // "2025-10-17 5:40" → "2025-10-17T05:40:00-07:00"
+    const [date, time] = timeStr.split(' ');
+    const [hour, minute] = time.split(':');
+    const iso = `${date}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}:00-07:00`;
+    const dateObj = new Date(iso);
+    return isNaN(dateObj) ? null : dateObj.getTime(); // возвращаем UTC timestamp
   }
 
   updateContainer(container) {
