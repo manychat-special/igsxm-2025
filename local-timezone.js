@@ -77,13 +77,23 @@ document.addEventListener("DOMContentLoaded", function () {
     // Use new Date() for October format, parseAsPDT for YYYY-MM-DD format
     let start, end;
     if (startAttr && startAttr.includes('October')) {
-      start = new Date(startAttr);
+      // For October format, manually add PDT timezone
+      const isoStart = startAttr.replace('October', '2025-10').replace(' AM', '').replace(' PM', '');
+      const [datePart, timePart] = isoStart.split(' ');
+      const [month, day] = datePart.split(' ');
+      const formattedStart = `2025-10-${day.padStart(2, '0')}T${timePart}-07:00`;
+      start = new Date(formattedStart);
     } else {
       start = parseAsPDT(startAttr);
     }
     
     if (endAttr && endAttr.includes('October')) {
-      end = new Date(endAttr);
+      // For October format, manually add PDT timezone
+      const isoEnd = endAttr.replace('October', '2025-10').replace(' AM', '').replace(' PM', '');
+      const [datePart, timePart] = isoEnd.split(' ');
+      const [month, day] = datePart.split(' ');
+      const formattedEnd = `2025-10-${day.padStart(2, '0')}T${timePart}-07:00`;
+      end = new Date(formattedEnd);
     } else {
       end = parseAsPDT(endAttr);
     }
