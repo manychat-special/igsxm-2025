@@ -1,24 +1,13 @@
 /**
- * Utility function to get current session slug from URL
- */
-function getCurrentSessionSlug() {
-    const url = window.location.href;
-    // Extract slug from URL like: igsummit.manychat.com/virtual/join/sessions/test-session
-    const match = url.match(/\/sessions\/([^\/\?]+)/);
-    return match ? match[1] : null;
-}
-
-/**
  * Next Session Overlay Manager
  * Shows overlay when session ends and redirects to next session
  */
 class NextSessionOverlayManager {
     constructor() {
         this.overlayElement = null;
+        this.currentTimer = null;
         this.checkInterval = null;
         this.progressTimer = null; // Progress bar timer
-        this.redirectTimer = null; // Redirect timer
-        this.countdownInterval = null; // Countdown interval
         this.shownSessions = new Set(); // Track shown sessions to prevent duplicates
         
         this.init();
@@ -38,6 +27,10 @@ class NextSessionOverlayManager {
         // Start checking every 10 seconds
         this.startChecking();
         
+        // TEMPORARY: Show overlay immediately for testing
+        // setTimeout(() => {
+        //     this.testShowOverlay();
+        // }, 2000);
     }
     
     startChecking() {
@@ -50,7 +43,7 @@ class NextSessionOverlayManager {
         const now = new Date();
         
         // Get current session slug from URL
-        const currentSlug = getCurrentSessionSlug();
+        const currentSlug = this.getCurrentSessionSlug();
         if (!currentSlug) return;
         
         // Find the current session element by slug
@@ -261,10 +254,10 @@ class NextSessionOverlayManager {
         updateCountdown();
         
         // Start countdown every second
-        this.countdownInterval = setInterval(() => {
+        const countdownInterval = setInterval(() => {
             updateCountdown();
             if (remainingSeconds < 0) {
-                clearInterval(this.countdownInterval);
+                clearInterval(countdownInterval);
             }
         }, 1000);
         
@@ -275,8 +268,8 @@ class NextSessionOverlayManager {
             progressElement.style.width = '100%';
             
             // Timer for redirect
-            this.redirectTimer = setTimeout(() => {
-                clearInterval(this.countdownInterval);
+            this.progressTimer = setTimeout(() => {
+                clearInterval(countdownInterval);
                 if (linkElement && linkElement.href) {
                     window.location.href = linkElement.href;
                 }
@@ -284,6 +277,14 @@ class NextSessionOverlayManager {
         }, 100);
     }
     
+    // TEMPORARY: Method for testing - force show overlay
+    testShowOverlay() {
+        // Find first session for testing
+        const firstSession = document.querySelector('[data-agenda-item]');
+        if (firstSession) {
+            this.showOverlay(firstSession);
+        }
+    }
     
     hideOverlay() {
         if (this.overlayElement) {
@@ -291,19 +292,14 @@ class NextSessionOverlayManager {
         }
         
         // Clear all timers
+        if (this.currentTimer) {
+            clearTimeout(this.currentTimer);
+            this.currentTimer = null;
+        }
+        
         if (this.progressTimer) {
             clearTimeout(this.progressTimer);
             this.progressTimer = null;
-        }
-        
-        if (this.redirectTimer) {
-            clearTimeout(this.redirectTimer);
-            this.redirectTimer = null;
-        }
-        
-        if (this.countdownInterval) {
-            clearInterval(this.countdownInterval);
-            this.countdownInterval = null;
         }
     }
     
@@ -311,14 +307,11 @@ class NextSessionOverlayManager {
         if (this.checkInterval) {
             clearInterval(this.checkInterval);
         }
+        if (this.currentTimer) {
+            clearTimeout(this.currentTimer);
+        }
         if (this.progressTimer) {
             clearTimeout(this.progressTimer);
-        }
-        if (this.redirectTimer) {
-            clearTimeout(this.redirectTimer);
-        }
-        if (this.countdownInterval) {
-            clearInterval(this.countdownInterval);
         }
     }
 }
@@ -384,7 +377,7 @@ class AdditionalSessionOverlayManager {
         const now = new Date();
         
         // Get current session slug from URL
-        const currentSlug = getCurrentSessionSlug();
+        const currentSlug = this.getCurrentSessionSlug();
         if (!currentSlug) return;
         
         // Find the current session element by slug
