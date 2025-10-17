@@ -22,6 +22,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Make parseAsPDT available globally for other scripts
   window.parseAsPDT = parseAsPDT;
+  
+  // Make renderOne available globally for other scripts
+  window.renderOne = renderOne;
 
   // Return local timezone abbreviation (fixed for Oct 22–23, 2025)
   function getUserTzAbbr() {

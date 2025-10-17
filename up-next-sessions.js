@@ -1,7 +1,6 @@
 /**
- * Upcoming Sessions Manager (UTC comparison + local display)
+ * Upcoming Sessions Manager (UTC comparison version)
  * — сравнивает время в UTC: текущее время vs время сессий (PDT = UTC-7)
- * — ждёт обработки local-timezone.js для корректного отображения
  * — показывает ближайшие N сессий, которые ещё не начались
  * — работает корректно в любой временной зоне
  */
@@ -40,12 +39,10 @@ class UpcomingSessionsManager {
   // Парсим время сессии в UTC timestamp (PDT = UTC-7)
   parseTimeToUTC(timeStr) {
     if (!timeStr) return null;
-    // "2025-10-17 5:40" → "2025-10-17T05:40:00-07:00"
-    const [date, time] = timeStr.split(' ');
-    const [hour, minute] = time.split(':');
-    const iso = `${date}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}:00-07:00`;
-    const dateObj = new Date(iso);
-    return isNaN(dateObj) ? null : dateObj.getTime(); // возвращаем UTC timestamp
+    // Добавляем PDT timezone: "2025-10-17 5:40" → "2025-10-17T5:40-07:00"
+    const iso = timeStr.replace(" ", "T") + "-07:00";
+    const date = new Date(iso);
+    return isNaN(date) ? null : date.getTime(); // возвращаем UTC timestamp
   }
 
   updateContainer(container) {
@@ -64,23 +61,15 @@ class UpcomingSessionsManager {
 
     // скрываем всё
     sessions.forEach(s => (s.style.display = "none"));
-    // показываем только N ближайших
-    upcoming.slice(0, container.limit).forEach(s => (s.style.display = ""));
+    // показываем только N ближайших и обновляем время
+    upcoming.slice(0, container.limit).forEach(s => {
+      s.style.display = "";
+      // Обновляем время для этой сессии в локальном формате
+      if (window.renderOne) window.renderOne(s);
+    });
   }
 
   updateAllContainers() {
-    // Ждём, пока local-timezone.js обработает все элементы
-    const timeElements = document.querySelectorAll('[data-time-copy="start"]');
-    const hasProcessedTimes = timeElements.length > 0 && 
-      Array.from(timeElements).every(el => el.textContent.trim() !== '');
-    
-    if (!hasProcessedTimes) {
-      // Если ещё не обработано, попробовать через 100мс
-      setTimeout(() => this.updateAllContainers(), 100);
-      return;
-    }
-    
-    // Теперь обновляем контейнеры
     this.containers.forEach(c => this.updateContainer(c));
   }
 
