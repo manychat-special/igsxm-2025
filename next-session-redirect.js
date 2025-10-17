@@ -366,46 +366,52 @@ class AdditionalSessionOverlayManager {
     checkForSessionEnd() {
         const now = new Date();
         
-        // Find all sessions on page (same as original)
-        const sessions = document.querySelectorAll('[data-agenda-item]');
+        // Get current session slug from URL
+        const currentSlug = this.getCurrentSessionSlug();
+        if (!currentSlug) return;
         
-        sessions.forEach(sessionElement => {
-            const endTimeStr = sessionElement.getAttribute('data-end-time');
-            if (!endTimeStr) return;
-            
-            const endTime = new Date(endTimeStr);
-            const timeSinceEnd = now.getTime() - endTime.getTime();
-            const sessionId = sessionElement.getAttribute('data-agenda-item');
-            
-            // Check session-ended overlay (1 minute after session ends)
-            if (this.sessionEndedOverlay && timeSinceEnd >= 60000) {
-                if (!this.shownSessions.has(sessionId + '-ended')) {
-                    this.shownSessions.add(sessionId + '-ended');
-                    this.sessionEndedOverlay.classList.remove('hide');
-                }
+        // Find the current session element by slug
+        const currentSessionElement = document.querySelector(`[data-agenda-item="${currentSlug}"]`);
+        if (!currentSessionElement) return;
+        
+        const endTimeStr = currentSessionElement.getAttribute('data-end-time');
+        if (!endTimeStr) return;
+        
+        const endTime = new Date(endTimeStr);
+        const timeSinceEnd = now.getTime() - endTime.getTime();
+        const sessionId = currentSessionElement.getAttribute('data-agenda-item');
+        
+        // Check session-ended overlay (1 minute after session ends)
+        if (this.sessionEndedOverlay && timeSinceEnd >= 60000) {
+            if (!this.shownSessions.has(sessionId + '-ended')) {
+                this.shownSessions.add(sessionId + '-ended');
+                this.sessionEndedOverlay.classList.remove('hide');
             }
-            
-            // Check ondemand overlay (only if session has ended and delay is positive)
-            if (this.sessionOndemandOverlay) {
-                const ondemandDelay = this.sessionOndemandOverlay.getAttribute('data-session-ondemand');
-                console.log(`Session ${sessionId}: timeSinceEnd=${timeSinceEnd}, ondemandDelay=${ondemandDelay}`);
-                
-                if (timeSinceEnd > 0 && ondemandDelay) {
-                    const delayMinutes = parseInt(ondemandDelay);
-                    if (!isNaN(delayMinutes) && delayMinutes > 0) {
-                        const delayMs = delayMinutes * 60 * 1000;
-                        console.log(`Session ${sessionId}: delayMs=${delayMs}, timeSinceEnd >= delayMs: ${timeSinceEnd >= delayMs}`);
-                        if (timeSinceEnd >= delayMs) {
-                            if (!this.shownSessions.has(sessionId + '-ondemand')) {
-                                this.shownSessions.add(sessionId + '-ondemand');
-                                this.sessionOndemandOverlay.classList.remove('hide');
-                                console.log(`Showing ondemand overlay for session ${sessionId}`);
-                            }
+        }
+        
+        // Check ondemand overlay (only if session has ended)
+        if (this.sessionOndemandOverlay && timeSinceEnd > 0) {
+            const ondemandDelay = this.sessionOndemandOverlay.getAttribute('data-session-ondemand');
+            if (ondemandDelay) {
+                const delayMinutes = parseInt(ondemandDelay);
+                if (!isNaN(delayMinutes)) {
+                    const delayMs = delayMinutes * 60 * 1000;
+                    if (timeSinceEnd >= delayMs) {
+                        if (!this.shownSessions.has(sessionId + '-ondemand')) {
+                            this.shownSessions.add(sessionId + '-ondemand');
+                            this.sessionOndemandOverlay.classList.remove('hide');
                         }
                     }
                 }
             }
-        });
+        }
+    }
+    
+    getCurrentSessionSlug() {
+        const url = window.location.href;
+        // Extract slug from URL like: igsummit.manychat.com/virtual/join/sessions/test-session
+        const match = url.match(/\/sessions\/([^\/\?]+)/);
+        return match ? match[1] : null;
     }
     
     destroy() {
