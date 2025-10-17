@@ -18,6 +18,16 @@ document.addEventListener("DOMContentLoaded", function () {
   // Parse as fixed PDT (UTC−07:00)
   function parseAsPDT(str) {
     if (!str) return null;
+    
+    // Handle "October 16, 2025 9:10 AM" format
+    if (str.includes("October") || str.includes("November") || str.includes("December") || 
+        str.includes("January") || str.includes("February") || str.includes("March") ||
+        str.includes("April") || str.includes("May") || str.includes("June") ||
+        str.includes("July") || str.includes("August") || str.includes("September")) {
+      const d = new Date(str);
+      if (!isNaN(d)) return d;
+    }
+    
     let iso = normalizeToIso(str);
     if (!/[Zz]|[+\-]\d{2}:?\d{2}$/.test(iso)) iso += "-07:00"; // add only if absent
     const d = new Date(iso);
