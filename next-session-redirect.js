@@ -17,6 +17,8 @@ class NextSessionOverlayManager {
         this.overlayElement = null;
         this.checkInterval = null;
         this.progressTimer = null; // Progress bar timer
+        this.redirectTimer = null; // Redirect timer
+        this.countdownInterval = null; // Countdown interval
         this.shownSessions = new Set(); // Track shown sessions to prevent duplicates
         
         this.init();
@@ -259,10 +261,10 @@ class NextSessionOverlayManager {
         updateCountdown();
         
         // Start countdown every second
-        const countdownInterval = setInterval(() => {
+        this.countdownInterval = setInterval(() => {
             updateCountdown();
             if (remainingSeconds < 0) {
-                clearInterval(countdownInterval);
+                clearInterval(this.countdownInterval);
             }
         }, 1000);
         
@@ -273,8 +275,8 @@ class NextSessionOverlayManager {
             progressElement.style.width = '100%';
             
             // Timer for redirect
-            setTimeout(() => {
-                clearInterval(countdownInterval);
+            this.redirectTimer = setTimeout(() => {
+                clearInterval(this.countdownInterval);
                 if (linkElement && linkElement.href) {
                     window.location.href = linkElement.href;
                 }
@@ -293,6 +295,16 @@ class NextSessionOverlayManager {
             clearTimeout(this.progressTimer);
             this.progressTimer = null;
         }
+        
+        if (this.redirectTimer) {
+            clearTimeout(this.redirectTimer);
+            this.redirectTimer = null;
+        }
+        
+        if (this.countdownInterval) {
+            clearInterval(this.countdownInterval);
+            this.countdownInterval = null;
+        }
     }
     
     destroy() {
@@ -301,6 +313,12 @@ class NextSessionOverlayManager {
         }
         if (this.progressTimer) {
             clearTimeout(this.progressTimer);
+        }
+        if (this.redirectTimer) {
+            clearTimeout(this.redirectTimer);
+        }
+        if (this.countdownInterval) {
+            clearInterval(this.countdownInterval);
         }
     }
 }
