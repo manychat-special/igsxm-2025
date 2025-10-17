@@ -272,6 +272,10 @@ background-color: var(--ht-color-accent-15);
   border-radius: 0px;
 }
 
+.notification:hover {
+  background-color: var(--ht-color-accent-15);
+}
+
 /* ========================================
    REACTIONS
    ======================================== */
