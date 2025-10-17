@@ -168,22 +168,16 @@ class SessionVisibilityManager {
         
         // Calculate time with offset
         let adjustedStartTime = startTime;
-        let adjustedEndTime = endTime;
+        let duringEndTime = endTime;
         
         if (duringMinutes < 0) {
             // Negative offset - start earlier
             adjustedStartTime = new Date(startTime.getTime() + (duringMinutes * 60 * 1000));
         }
         
-        // Apply after-session offset
-        if (afterMinutes > 0) {
-            // Positive offset - end later for after state
-            adjustedEndTime = new Date(endTime.getTime() + (afterMinutes * 60 * 1000));
-        }
-        
         if (now < adjustedStartTime) {
             return 'before';
-        } else if (now >= adjustedStartTime && now <= adjustedEndTime) {
+        } else if (now >= adjustedStartTime && now <= duringEndTime) {
             return 'during';
         } else {
             return 'after';
