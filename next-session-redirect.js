@@ -385,8 +385,8 @@ class AdditionalSessionOverlayManager {
                 }
             }
             
-            // Check ondemand overlay
-            if (this.sessionOndemandOverlay) {
+            // Check ondemand overlay (only if session has ended)
+            if (this.sessionOndemandOverlay && timeSinceEnd >= 0) {
                 const ondemandDelay = this.sessionOndemandOverlay.getAttribute('data-session-ondemand');
                 if (ondemandDelay) {
                     const delayMinutes = parseInt(ondemandDelay);
