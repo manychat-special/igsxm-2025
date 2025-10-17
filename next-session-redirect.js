@@ -391,8 +391,8 @@ class AdditionalSessionOverlayManager {
         const timeSinceEnd = now.getTime() - endTime.getTime();
         const sessionId = currentSessionElement.getAttribute('data-agenda-item');
         
-        // Check session-ended overlay (1 minute after session ends)
-        if (this.sessionEndedOverlay && timeSinceEnd >= 60000) {
+        // Check session-ended overlay (30 seconds after session ends)
+        if (this.sessionEndedOverlay && timeSinceEnd >= 30000) {
             if (!this.shownSessions.has(sessionId + '-ended')) {
                 this.shownSessions.add(sessionId + '-ended');
                 this.sessionEndedOverlay.classList.remove('hide');
