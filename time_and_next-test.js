@@ -161,4 +161,62 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   window.upcomingManager=new UpcomingSessionsManager();
+  
+  /*───────────────────────────────
+   * Live Sessions (start <= now < end)
+   *───────────────────────────────*/
+  class LiveSessionsManager{
+    constructor(){
+      this.containers=[];
+      this.interval=null;
+      this.checkInterval=30000;
+      this.init();
+    }
+
+    init(){
+      this.findContainers();
+      this.updateAllContainers();
+      this.startPeriodicUpdates();
+      document.addEventListener("visibilitychange",()=>{if(!document.hidden)this.updateAllContainers();});
+      window.addEventListener("load",()=>{setTimeout(()=>this.updateAllContainers(),300);});
+    }
+
+    findContainers(){
+      this.containers=Array.from(document.querySelectorAll("[data-live-sessions]")).map(el=>({
+        el,limit:parseInt(el.getAttribute("data-live-sessions"))||3
+      }));
+    }
+
+    parseToUtcTimestamp(timeStr){
+      if(!timeStr)return null;
+      const date=parseAsPDT(timeStr);
+      return date?date.getTime():null;
+    }
+
+    updateContainer(container){
+      const sessions=Array.from(container.el.querySelectorAll("[data-agenda-item]"));
+      const nowUtc=Date.now();
+
+      const live=sessions
+        .map(s=>({
+          el:s,
+          startUtc:this.parseToUtcTimestamp(s.getAttribute("data-start-time")),
+          endUtc:this.parseToUtcTimestamp(s.getAttribute("data-end-time"))
+        }))
+        .filter(x=>x.startUtc!=null && x.endUtc!=null && x.startUtc<=nowUtc && nowUtc<x.endUtc)
+        .sort((a,b)=>a.startUtc-b.startUtc)
+        .map(x=>x.el);
+
+      sessions.forEach(s=>s.style.display="none");
+      live.slice(0,container.limit).forEach(s=>s.style.display="");
+
+      // после фильтрации — пересчёт времени
+      window.renderAllSessions();
+    }
+
+    updateAllContainers(){ this.containers.forEach(c=>this.updateContainer(c)); }
+    startPeriodicUpdates(){ this.interval=setInterval(()=>this.updateAllContainers(),this.checkInterval); }
+  }
+
+  window.liveManager=new LiveSessionsManager();
 });
