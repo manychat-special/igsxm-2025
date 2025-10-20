@@ -150,7 +150,11 @@ document.addEventListener("DOMContentLoaded", function () {
         .map(x=>x.el);
 
       sessions.forEach(s=>s.style.display="none");
-      upcoming.slice(0,container.limit).forEach(s=>s.style.display="");
+      const toShow=upcoming.slice(0,container.limit);
+      toShow.forEach(s=>s.style.display="");
+
+      // toggle container visibility when empty
+      container.el.style.display = toShow.length ? "" : "none";
 
       // после фильтрации — пересчёт времени
       window.renderAllSessions();
@@ -208,7 +212,11 @@ document.addEventListener("DOMContentLoaded", function () {
         .map(x=>x.el);
 
       sessions.forEach(s=>s.style.display="none");
-      live.slice(0,container.limit).forEach(s=>s.style.display="");
+      const toShow=live.slice(0,container.limit);
+      toShow.forEach(s=>s.style.display="");
+
+      // toggle container visibility when empty
+      container.el.style.display = toShow.length ? "" : "none";
 
       // после фильтрации — пересчёт времени
       window.renderAllSessions();
