@@ -41,10 +41,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Return local timezone abbreviation with Luxon fallback
   function getUserTzAbbr() {
-    // Try Luxon first
+    // Try Luxon with better abbreviation format
     if (hasLuxon) {
       try {
-        return luxon.DateTime.now().toFormat('ZZZZ');
+        // Try to get short abbreviation first
+        const now = luxon.DateTime.now();
+        const shortAbbr = now.toFormat('z');
+        // If we get a meaningful abbreviation (not just offset), use it
+        if (shortAbbr && !shortAbbr.match(/^[+-]\d{2}:\d{2}$/)) {
+          return shortAbbr;
+        }
+        // Fallback to ZZZ format
+        const mediumAbbr = now.toFormat('ZZZ');
+        if (mediumAbbr && !mediumAbbr.match(/^[+-]\d{2}:\d{2}$/)) {
+          return mediumAbbr;
+        }
       } catch (e) {
         console.warn('Luxon timezone detection failed, using fallback:', e);
       }
