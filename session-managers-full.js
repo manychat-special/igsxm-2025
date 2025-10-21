@@ -944,7 +944,7 @@ document.addEventListener("DOMContentLoaded", function () {
       this.feedbackElement = document.querySelector('[data-session-feedback]');
       if (!this.feedbackElement) return;
       
-      this.feedbackElement.style.display = 'none';
+      this.feedbackElement.classList.add('hide');
       this.startChecking();
     }
 
@@ -959,25 +959,25 @@ document.addEventListener("DOMContentLoaded", function () {
       
       const currentSlug = getCurrentSessionSlug();
       if (!currentSlug) {
-        this.feedbackElement.style.display = 'none';
+        this.feedbackElement.classList.add('hide');
         return;
       }
       
       const sessionElement = document.querySelector(`[data-agenda-item="${currentSlug}"]`);
       if (!sessionElement) {
-        this.feedbackElement.style.display = 'none';
+        this.feedbackElement.classList.add('hide');
         return;
       }
       
       const endTimeStr = sessionElement.getAttribute('data-end-time');
       if (!endTimeStr) {
-        this.feedbackElement.style.display = 'none';
+        this.feedbackElement.classList.add('hide');
         return;
       }
       
       const endUtc = parseToUtcTimestamp(endTimeStr);
       if (!endUtc) {
-        this.feedbackElement.style.display = 'none';
+        this.feedbackElement.classList.add('hide');
         return;
       }
       
@@ -986,9 +986,9 @@ document.addEventListener("DOMContentLoaded", function () {
       const nowUtc = Date.now();
       
       if (nowUtc >= showTimeUtc) {
-        this.feedbackElement.style.display = '';
+        this.feedbackElement.classList.remove('hide');
       } else {
-        this.feedbackElement.style.display = 'none';
+        this.feedbackElement.classList.add('hide');
       }
     }
 
