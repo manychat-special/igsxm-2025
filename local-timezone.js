@@ -14,8 +14,8 @@ document.addEventListener("DOMContentLoaded", function () {
     return `${d}T${h.padStart(2,"0")}:${m.padStart(2,"0")}:${s.padStart(2,"0")}`;
   }
 
-  // Parse as fixed PDT (UTC−07:00) if no timezone provided
-  function parseAsPDT(str) {
+  // Parse LA time and convert to local time
+  function parseLATime(str) {
     if (!str) return null;
     
     // Try Luxon first for all formats
@@ -23,14 +23,17 @@ document.addEventListener("DOMContentLoaded", function () {
       try {
         // For "October 16, 2025 9:10 AM" format
         if (str.match(/^[A-Za-z]+ \d+, \d{4} \d+:\d+ [AP]M$/)) {
-          return luxon.DateTime.fromFormat(str + ' PDT', 'MMMM d, yyyy h:mm a PDT', { 
+          return luxon.DateTime.fromFormat(str, 'MMMM d, yyyy h:mm a', { 
             zone: 'America/Los_Angeles' 
           }).toJSDate();
         }
         
         // For ISO formats
         let iso = normalizeToIso(str);
-        if (!/[Zz]|[+\-]\d{2}:?\d{2}$/.test(iso)) iso += "-07:00";
+        if (!/[Zz]|[+\-]\d{2}:?\d{2}$/.test(iso)) {
+          // Treat as LA time if no timezone specified
+          return luxon.DateTime.fromISO(iso, { zone: 'America/Los_Angeles' }).toJSDate();
+        }
         return luxon.DateTime.fromISO(iso, { zone: 'America/Los_Angeles' }).toJSDate();
       } catch (e) {
         console.warn('Luxon parsing failed, using fallback:', e);
@@ -54,8 +57,9 @@ document.addEventListener("DOMContentLoaded", function () {
     return isNaN(d) ? null : d;
   }
 
-  // Make parseAsPDT available globally for other scripts
-  window.parseAsPDT = parseAsPDT;
+  // Make parseLATime available globally for other scripts (backward compatibility)
+  window.parseAsPDT = parseLATime;
+  window.parseLATime = parseLATime;
 
   // Return local timezone abbreviation with Luxon fallback
   function getUserTzAbbr() {
@@ -133,8 +137,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const startAttr = session.getAttribute("data-start-time");
     const endAttr   = session.getAttribute("data-end-time");
     
-    const start = parseAsPDT(startAttr);
-    const end = parseAsPDT(endAttr);
+    const start = parseLATime(startAttr);
+    const end = parseLATime(endAttr);
     
     if (!start || !end) return;
 
