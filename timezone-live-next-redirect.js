@@ -525,7 +525,290 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+  /*───────────────────────────────
+   * Nested Collections Manager (data-agenda-next)
+   *───────────────────────────────*/
+  class NestedCollectionsManager{
+    constructor(){
+      this.sessions=[];
+      this.updateInterval=null;
+      this.checkInterval=30000;
+      this.init();
+    }
+
+    init(){
+      this.findSessions();
+      this.findNestedCollections();
+      this.updateAllSessions();
+      this.startPeriodicUpdates();
+      document.addEventListener("visibilitychange",()=>{if(!document.hidden)this.updateAllSessions();});
+      window.addEventListener("load",()=>{setTimeout(()=>this.updateAllSessions(),300);});
+    }
+
+    findSessions(){
+      const sessionElements=document.querySelectorAll('[data-agenda-item]');
+      
+      sessionElements.forEach(element=>{
+        const startTime=element.getAttribute('data-start-time');
+        const endTime=element.getAttribute('data-end-time');
+        
+        if(startTime&&endTime){
+          this.sessions.push({
+            element:element,
+            startTime:parseLATime(startTime),
+            endTime:parseLATime(endTime)
+          });
+        }
+      });
+      
+      console.log(`Found ${this.sessions.length} sessions to manage`);
+    }
+
+    findNestedCollections(){
+      const collectionLists=document.querySelectorAll('[data-agenda-next]');
+      console.log(`Found ${collectionLists.length} nested collections`);
+      
+      collectionLists.forEach((collectionList,index)=>{
+        const parentSessionId=collectionList.getAttribute('data-agenda-next');
+        console.log(`Collection ${index}: Looking for parent session with ID: "${parentSessionId}"`);
+        
+        const parentSession=this.sessions.find(s=>
+          s.element.getAttribute('data-agenda-item')===parentSessionId
+        );
+        
+        console.log(`Available sessions:`,this.sessions.map(s=>s.element.getAttribute('data-agenda-item')));
+        
+        if(parentSession){
+          console.log(`Found parent session: ${parentSessionId}`);
+          const childSessions=collectionList.querySelectorAll('[data-agenda-item]');
+          console.log(`Found ${childSessions.length} child sessions in collection`);
+          this.filterNestedSessions(collectionList,childSessions,parentSession);
+        }else{
+          console.log(`Parent session not found: ${parentSessionId}`);
+        }
+      });
+    }
+
+    filterNestedSessions(collectionList,childSessions,parentSession){
+      const parentStartTime=parentSession.startTime.getTime();
+      const parentEndTime=parentSession.endTime.getTime();
+      
+      // Show sessions that are:
+      // 1. Simultaneous (running at the same time as parent)
+      // 2. Starting after parent session ends (within 30 minutes)
+      const relevantSessions=[];
+      
+      childSessions.forEach(childElement=>{
+        const startTime=childElement.getAttribute('data-start-time');
+        const endTime=childElement.getAttribute('data-end-time');
+        
+        if(startTime&&endTime){
+          const childStartTime=parseLATime(startTime).getTime();
+          const childEndTime=parseLATime(endTime).getTime();
+          
+          // Check if session is relevant
+          const isSimultaneous=(childStartTime<parentEndTime&&childEndTime>parentStartTime);
+          const startsAfterWithBuffer=(childStartTime>=parentEndTime&&childStartTime<=parentEndTime+(30*60*1000)); // 30 minutes buffer
+          
+          // Debug logging
+          console.log(`Parent: ${new Date(parentStartTime).toLocaleTimeString()} - ${new Date(parentEndTime).toLocaleTimeString()}`);
+          console.log(`Child: ${new Date(childStartTime).toLocaleTimeString()} - ${new Date(childEndTime).toLocaleTimeString()}`);
+          console.log(`Simultaneous: ${isSimultaneous}, Starts after (30min buffer): ${startsAfterWithBuffer}`);
+          
+          if(isSimultaneous||startsAfterWithBuffer){
+            relevantSessions.push(childElement);
+          }else{
+            childElement.style.display='none';
+          }
+        }
+      });
+      
+      // Show relevant sessions
+      relevantSessions.forEach(session=>{
+        session.style.display='';
+      });
+      
+      console.log(`Filtered nested collection: showing ${relevantSessions.length} of ${childSessions.length} sessions`);
+    }
+
+    updateAllSessions(){
+      this.sessions.forEach(session=>{
+        this.updateSessionVisibility(session);
+      });
+      this.updateNestedCollections();
+    }
+
+    updateNestedCollections(){
+      const collectionLists=document.querySelectorAll('[data-agenda-next]');
+      
+      collectionLists.forEach(collectionList=>{
+        const parentSessionId=collectionList.getAttribute('data-agenda-next');
+        const parentSession=this.sessions.find(s=>
+          s.element.getAttribute('data-agenda-item')===parentSessionId
+        );
+        
+        if(parentSession){
+          const childSessions=collectionList.querySelectorAll('[data-agenda-item]');
+          this.filterNestedSessions(collectionList,childSessions,parentSession);
+        }
+      });
+    }
+
+    updateSessionVisibility(session){
+      const now=new Date();
+      const {startTime,endTime,element}=session;
+      
+      // Check data-during-session attribute on child elements
+      const duringElement=element.querySelector('[data-during-session]');
+      const duringOffset=duringElement?duringElement.getAttribute('data-during-session'):null;
+      const duringMinutes=duringOffset?parseInt(duringOffset):0;
+      
+      // Check data-after-session attribute on child elements
+      const afterElement=element.querySelector('[data-after-session]');
+      const afterOffset=afterElement?afterElement.getAttribute('data-after-session'):null;
+      const afterMinutes=afterOffset?parseInt(afterOffset):0;
+      
+      // Calculate time with offset
+      let adjustedStartTime=startTime;
+      let duringEndTime=endTime;
+      
+      if(duringMinutes<0){
+        // Negative offset - start earlier
+        adjustedStartTime=new Date(startTime.getTime()+(duringMinutes*60*1000));
+      }
+      
+      let state;
+      if(now<adjustedStartTime){
+        state='before';
+      }else if(now>=adjustedStartTime&&now<=duringEndTime){
+        state='during';
+      }else{
+        state='after';
+      }
+      
+      // Hide all state-specific elements first
+      const attributes={
+        before:'data-before-session',
+        during:'data-during-session',
+        after:'data-after-session'
+      };
+      
+      Object.values(attributes).forEach(attr=>{
+        const stateElements=element.querySelectorAll(`[${attr}]`);
+        stateElements.forEach(el=>{
+          el.style.display='none';
+        });
+      });
+      
+      // Show elements for current state
+      const currentStateAttr=attributes[state];
+      const currentStateElements=element.querySelectorAll(`[${currentStateAttr}]`);
+      currentStateElements.forEach(el=>{
+        el.style.display='';
+      });
+      
+      // Handle data-agenda-live elements (only during real session time, no offset)
+      const liveElements=element.querySelectorAll('[data-agenda-live]');
+      const isRealSessionTime=now>=session.startTime&&now<=session.endTime;
+      
+      liveElements.forEach(el=>{
+        if(isRealSessionTime){
+          el.style.display='flex';
+        }else{
+          el.style.display='none';
+        }
+      });
+      
+      // Handle data-after-session elements (with offset support)
+      const afterElements=element.querySelectorAll('[data-after-session]');
+      afterElements.forEach(el=>{
+        const afterOffset=el.getAttribute('data-after-session');
+        const afterMinutes=afterOffset?parseInt(afterOffset):0;
+        
+        if(afterMinutes>0){
+          // Show after specified delay
+          const afterTime=new Date(session.endTime.getTime()+(afterMinutes*60*1000));
+          if(now>=afterTime){
+            el.style.display='';
+          }else{
+            el.style.display='none';
+          }
+        }else{
+          // Show immediately after session ends
+          if(now>session.endTime){
+            el.style.display='';
+          }else{
+            el.style.display='none';
+          }
+        }
+      });
+      
+      // Add/remove state classes for additional styling
+      element.classList.remove('session-before','session-during','session-after');
+      element.classList.add(`session-${state}`);
+    }
+
+    startPeriodicUpdates(){
+      // Check for state changes every 30 seconds
+      this.updateInterval=setInterval(()=>{
+        this.updateAllSessions();
+      },this.checkInterval);
+    }
+
+    destroy(){
+      if(this.updateInterval){
+        clearInterval(this.updateInterval);
+      }
+    }
+
+    // Public method to manually refresh sessions (useful for dynamic content)
+    refresh(){
+      this.sessions=[];
+      this.findSessions();
+      this.updateAllSessions();
+    }
+
+    // Public method to get current session state
+    getCurrentState(sessionElement){
+      const session=this.sessions.find(s=>s.element===sessionElement);
+      return session?this.getSessionState(session):null;
+    }
+
+    getSessionState(session){
+      const now=new Date();
+      const {startTime,endTime,element}=session;
+      
+      // Check data-during-session attribute on child elements
+      const duringElement=element.querySelector('[data-during-session]');
+      const duringOffset=duringElement?duringElement.getAttribute('data-during-session'):null;
+      const duringMinutes=duringOffset?parseInt(duringOffset):0;
+      
+      // Check data-after-session attribute on child elements
+      const afterElement=element.querySelector('[data-after-session]');
+      const afterOffset=afterElement?afterElement.getAttribute('data-after-session'):null;
+      const afterMinutes=afterOffset?parseInt(afterOffset):0;
+      
+      // Calculate time with offset
+      let adjustedStartTime=startTime;
+      let duringEndTime=endTime;
+      
+      if(duringMinutes<0){
+        // Negative offset - start earlier
+        adjustedStartTime=new Date(startTime.getTime()+(duringMinutes*60*1000));
+      }
+      
+      if(now<adjustedStartTime){
+        return 'before';
+      }else if(now>=adjustedStartTime&&now<=duringEndTime){
+        return 'during';
+      }else{
+        return 'after';
+      }
+    }
+  }
+
   // Initialize overlay managers
   window.nextSessionOverlayManager=new NextSessionOverlayManager();
   window.additionalSessionOverlayManager=new AdditionalSessionOverlayManager();
+  window.nestedCollectionsManager=new NestedCollectionsManager();
 });
