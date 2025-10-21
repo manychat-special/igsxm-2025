@@ -190,6 +190,9 @@ background-color: var(--ht-color-accent-15);
    USER PROFILE & METADATA
    ======================================== */
 
+.profile-picture {
+  object-fit: cover;
+}
 
 .user-profile-popup-wrap {
   padding: 24px;
