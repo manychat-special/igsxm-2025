@@ -6,6 +6,9 @@ document.addEventListener("DOMContentLoaded", function () {
   const timeFmt = { hour: "2-digit", minute: "2-digit", hour12: false };
   const dateFmt = { month: "short", day: "numeric" };
 
+  // Check if Luxon is available
+  const hasLuxon = typeof luxon !== 'undefined';
+
   // Normalize "YYYY-MM-DD H:m[:ss]" → ISO
   function normalizeToIso(str) {
     if (!str) return null;
@@ -37,6 +40,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Timezone abbreviation
   function getUserTzAbbr() {
+    // Try Luxon with better abbreviation format
+    if (hasLuxon) {
+      try {
+        // Try to get short abbreviation first
+        const now = luxon.DateTime.now();
+        const shortAbbr = now.toFormat('z');
+        // If we get a meaningful abbreviation (not just offset), use it
+        if (shortAbbr && !shortAbbr.match(/^[+-]\d{2}:\d{2}$/)) {
+          return shortAbbr.replace(/_/g, ' ');
+        }
+        // Fallback to ZZZ format
+        const mediumAbbr = now.toFormat('ZZZ');
+        if (mediumAbbr && !mediumAbbr.match(/^[+-]\d{2}:\d{2}$/)) {
+          return mediumAbbr.replace(/_/g, ' ');
+        }
+      } catch (e) {
+        console.warn('Luxon timezone detection failed, using fallback:', e);
+      }
+    }
+    
+    // Fallback to original hardcoded logic
     const tzIana = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     // Europe (DST still active in late Oct)
