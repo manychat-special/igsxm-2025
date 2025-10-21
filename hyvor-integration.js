@@ -29,6 +29,11 @@ window.$memberstackDom.getCurrentMember().then(async ({ data }) => {
         comments.setAttribute('colors', container.dataset.theme);
     }
     
+    // Set top_widget from container data attribute
+    if (container && container.dataset.widgets) {
+        comments.setAttribute('top_widget', container.dataset.widgets);
+    }
+    
     comments.setAttribute('t-comment-button-text', '↑');
     comments.setAttribute('t-reply-button-text', '↑');
     comments.setAttribute('t-ago-seconds', '* s');
