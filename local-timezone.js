@@ -41,12 +41,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Return local timezone abbreviation with Luxon fallback
   function getUserTzAbbr() {
-    // Try Luxon with ZZZZ format
+    // Try Luxon with offsetNameShort
     if (hasLuxon) {
       try {
         const now = luxon.DateTime.now();
-        const abbr = now.toFormat('ZZZZ');
-        // Use ZZZZ result (either short abbreviation or full IANA name)
+        const abbr = now.offsetNameShort;
+        // Use offsetNameShort result (short abbreviation or offset)
         if (abbr && !abbr.match(/^[+-]\d{2}:\d{2}$/)) {
           return abbr;
         }
