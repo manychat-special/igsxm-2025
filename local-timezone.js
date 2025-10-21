@@ -55,6 +55,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Australia (DST active in some regions)
     if (tzIana === "Australia/Brisbane" || tzIana === "Australia/Lindeman") return "AEST";
+    if (tzIana === "Australia/Adelaide") return "ACDT";
+    if (tzIana === "Australia/Perth") return "AWST";
+    if (tzIana === "Australia/Darwin") return "ACST";
     if (tzIana.startsWith("Australia/")) return "AEDT";
 
     // Fallback: GMT±X (City)
