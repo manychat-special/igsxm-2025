@@ -930,8 +930,78 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+  /*───────────────────────────────
+   * Feedback Manager (data-session-feedback)
+   *───────────────────────────────*/
+  class FeedbackManager {
+    constructor() {
+      this.feedbackElement = null;
+      this.checkInterval = null;
+      this.init();
+    }
+
+    init() {
+      this.feedbackElement = document.querySelector('[data-session-feedback]');
+      if (!this.feedbackElement) return;
+      
+      this.feedbackElement.style.display = 'none';
+      this.startChecking();
+    }
+
+    startChecking() {
+      this.checkInterval = setInterval(() => {
+        this.updateFeedbackVisibility();
+      }, CONFIG.checkInterval);
+    }
+
+    updateFeedbackVisibility() {
+      if (!this.feedbackElement) return;
+      
+      const currentSlug = getCurrentSessionSlug();
+      if (!currentSlug) {
+        this.feedbackElement.style.display = 'none';
+        return;
+      }
+      
+      const sessionElement = document.querySelector(`[data-agenda-item="${currentSlug}"]`);
+      if (!sessionElement) {
+        this.feedbackElement.style.display = 'none';
+        return;
+      }
+      
+      const endTimeStr = sessionElement.getAttribute('data-end-time');
+      if (!endTimeStr) {
+        this.feedbackElement.style.display = 'none';
+        return;
+      }
+      
+      const endUtc = parseToUtcTimestamp(endTimeStr);
+      if (!endUtc) {
+        this.feedbackElement.style.display = 'none';
+        return;
+      }
+      
+      const minutesBeforeEnd = parseInt(this.feedbackElement.getAttribute('data-session-feedback')) || 10;
+      const showTimeUtc = endUtc - (minutesBeforeEnd * 60 * 1000);
+      const nowUtc = Date.now();
+      
+      if (nowUtc >= showTimeUtc) {
+        this.feedbackElement.style.display = '';
+      } else {
+        this.feedbackElement.style.display = 'none';
+      }
+    }
+
+    destroy() {
+      if (this.checkInterval) {
+        clearInterval(this.checkInterval);
+      }
+    }
+  }
+
   // Initialize overlay managers
   window.nextSessionOverlayManager=new NextSessionOverlayManager();
   window.additionalSessionOverlayManager=new AdditionalSessionOverlayManager();
   window.nestedCollectionsManager=new NestedCollectionsManager();
+  window.feedbackManager=new FeedbackManager();
 });
