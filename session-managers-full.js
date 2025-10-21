@@ -599,30 +599,20 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       });
       
-      console.log(`Found ${this.sessions.length} sessions to manage`);
     }
 
     findNestedCollections(){
       const collectionLists=document.querySelectorAll('[data-agenda-next]');
-      console.log(`Found ${collectionLists.length} nested collections`);
       
       collectionLists.forEach((collectionList,index)=>{
         const parentSessionId=collectionList.getAttribute('data-agenda-next');
-        console.log(`Collection ${index}: Looking for parent session with ID: "${parentSessionId}"`);
-        
         const parentSession=this.sessions.find(s=>
           s.element.getAttribute('data-agenda-item')===parentSessionId
         );
         
-        console.log(`Available sessions:`,this.sessions.map(s=>s.element.getAttribute('data-agenda-item')));
-        
         if(parentSession){
-          console.log(`Found parent session: ${parentSessionId}`);
           const childSessions=collectionList.querySelectorAll('[data-agenda-item]');
-          console.log(`Found ${childSessions.length} child sessions in collection`);
           this.filterNestedSessions(collectionList,childSessions,parentSession);
-        }else{
-          console.log(`Parent session not found: ${parentSessionId}`);
         }
       });
     }
@@ -648,10 +638,6 @@ document.addEventListener("DOMContentLoaded", function () {
           const isSimultaneous=(childStartTime<parentEndTime&&childEndTime>parentStartTime);
           const startsAfterWithBuffer=(childStartTime>=parentEndTime&&childStartTime<=parentEndTime+(30*60*1000)); // 30 minutes buffer
           
-          // Debug logging
-          console.log(`Parent: ${new Date(parentStartTime).toLocaleTimeString()} - ${new Date(parentEndTime).toLocaleTimeString()}`);
-          console.log(`Child: ${new Date(childStartTime).toLocaleTimeString()} - ${new Date(childEndTime).toLocaleTimeString()}`);
-          console.log(`Simultaneous: ${isSimultaneous}, Starts after (30min buffer): ${startsAfterWithBuffer}`);
           
           if(isSimultaneous||startsAfterWithBuffer){
             relevantSessions.push(childElement);
@@ -680,7 +666,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       }
       
-      console.log(`Filtered nested collection: showing ${relevantSessions.length} of ${childSessions.length} sessions`);
     }
 
     updateAllSessions(){
