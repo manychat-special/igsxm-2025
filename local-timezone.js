@@ -18,9 +18,17 @@ document.addEventListener("DOMContentLoaded", function () {
   function parseAsPDT(str) {
     if (!str) return null;
     
-    // Try Luxon first
+    // Try Luxon first for all formats
     if (hasLuxon) {
       try {
+        // For "October 16, 2025 9:10 AM" format
+        if (str.match(/^[A-Za-z]+ \d+, \d{4} \d+:\d+ [AP]M$/)) {
+          return luxon.DateTime.fromFormat(str + ' PDT', 'MMMM d, yyyy h:mm a PDT', { 
+            zone: 'America/Los_Angeles' 
+          }).toJSDate();
+        }
+        
+        // For ISO formats
         let iso = normalizeToIso(str);
         if (!/[Zz]|[+\-]\d{2}:?\d{2}$/.test(iso)) iso += "-07:00";
         return luxon.DateTime.fromISO(iso, { zone: 'America/Los_Angeles' }).toJSDate();
@@ -30,6 +38,16 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     
     // Fallback to original logic
+    if (str.includes('October')) {
+      // For October format, manually add PDT timezone
+      const isoStart = str.replace('October', '2025-10').replace(' AM', '').replace(' PM', '');
+      const [datePart, timePart] = isoStart.split(' ');
+      const [month, day] = datePart.split(' ');
+      const formattedStart = `2025-10-${day.padStart(2, '0')}T${timePart}-07:00`;
+      const d = new Date(formattedStart);
+      return isNaN(d) ? null : d;
+    }
+    
     let iso = normalizeToIso(str);
     if (!/[Zz]|[+\-]\d{2}:?\d{2}$/.test(iso)) iso += "-07:00";
     const d = new Date(iso);
@@ -110,67 +128,13 @@ document.addEventListener("DOMContentLoaded", function () {
     if (el && el.textContent !== val) el.textContent = val;
   }
 
-  // Render one session with Luxon support
+  // Render one session
   function renderOne(session) {
     const startAttr = session.getAttribute("data-start-time");
     const endAttr   = session.getAttribute("data-end-time");
     
-    let start, end;
-    
-    // Try Luxon first for better timezone handling
-    if (hasLuxon) {
-      try {
-        if (startAttr && startAttr.includes('October')) {
-          // Handle October format with Luxon
-          const isoStart = startAttr.replace('October', '2025-10').replace(' AM', '').replace(' PM', '');
-          const [datePart, timePart] = isoStart.split(' ');
-          const [month, day] = datePart.split(' ');
-          const formattedStart = `2025-10-${day.padStart(2, '0')}T${timePart}`;
-          start = luxon.DateTime.fromISO(formattedStart, { zone: 'America/Los_Angeles' }).toJSDate();
-        } else {
-          start = parseAsPDT(startAttr);
-        }
-        
-        if (endAttr && endAttr.includes('October')) {
-          // Handle October format with Luxon
-          const isoEnd = endAttr.replace('October', '2025-10').replace(' AM', '').replace(' PM', '');
-          const [datePart, timePart] = isoEnd.split(' ');
-          const [month, day] = datePart.split(' ');
-          const formattedEnd = `2025-10-${day.padStart(2, '0')}T${timePart}`;
-          end = luxon.DateTime.fromISO(formattedEnd, { zone: 'America/Los_Angeles' }).toJSDate();
-        } else {
-          end = parseAsPDT(endAttr);
-        }
-      } catch (e) {
-        console.warn('Luxon rendering failed, using fallback:', e);
-        // Fall through to original logic
-      }
-    }
-    
-    // Fallback to original logic if Luxon failed or not available
-    if (!start || !end) {
-      if (startAttr && startAttr.includes('October')) {
-        // For October format, manually add PDT timezone
-        const isoStart = startAttr.replace('October', '2025-10').replace(' AM', '').replace(' PM', '');
-        const [datePart, timePart] = isoStart.split(' ');
-        const [month, day] = datePart.split(' ');
-        const formattedStart = `2025-10-${day.padStart(2, '0')}T${timePart}-07:00`;
-        start = new Date(formattedStart);
-      } else {
-        start = parseAsPDT(startAttr);
-      }
-      
-      if (endAttr && endAttr.includes('October')) {
-        // For October format, manually add PDT timezone
-        const isoEnd = endAttr.replace('October', '2025-10').replace(' AM', '').replace(' PM', '');
-        const [datePart, timePart] = isoEnd.split(' ');
-        const [month, day] = datePart.split(' ');
-        const formattedEnd = `2025-10-${day.padStart(2, '0')}T${timePart}-07:00`;
-        end = new Date(formattedEnd);
-      } else {
-        end = parseAsPDT(endAttr);
-      }
-    }
+    const start = parseAsPDT(startAttr);
+    const end = parseAsPDT(endAttr);
     
     if (!start || !end) return;
 
