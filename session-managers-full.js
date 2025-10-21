@@ -12,7 +12,8 @@ const CONFIG = {
   nextSessionBuffer: 120000,
   timeDiffThreshold: 5000,
   defaultLimit: 3,
-  loadDelay: 300
+  loadDelay: 300,
+  hideUpcomingAfter: 1800000
 };
 
 // Check if Luxon is available
@@ -665,10 +666,18 @@ document.addEventListener("DOMContentLoaded", function () {
         session.style.display='';
       });
       
+      // Check if parent session ended more than configured time ago
+      const now = Date.now();
+      const timeSinceParentEnded = now - parentEndTime;
+
       // Hide data-live-upcoming-sessions if no relevant sessions found
       const liveUpcomingElement = document.querySelector('[data-live-upcoming-sessions]');
       if (liveUpcomingElement) {
-        liveUpcomingElement.style.display = relevantSessions.length > 0 ? '' : 'none';
+        if (timeSinceParentEnded > CONFIG.hideUpcomingAfter) {
+          liveUpcomingElement.style.display = 'none';
+        } else {
+          liveUpcomingElement.style.display = relevantSessions.length > 0 ? '' : 'none';
+        }
       }
       
       console.log(`Filtered nested collection: showing ${relevantSessions.length} of ${childSessions.length} sessions`);
