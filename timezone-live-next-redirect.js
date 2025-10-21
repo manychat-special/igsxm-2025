@@ -18,11 +18,33 @@ document.addEventListener("DOMContentLoaded", function () {
     return `${d}T${h.padStart(2,"0")}:${m.padStart(2,"0")}:${s.padStart(2,"0")}`;
   }
 
-  // Parse as fixed PDT (UTC−07:00)
-  function parseAsPDT(str) {
+  // Parse LA time and convert to local time
+  function parseLATime(str) {
     if (!str) return null;
     
-    // Handle "October 16, 2025 9:10 AM" format
+    // Try Luxon first for all formats
+    if (hasLuxon) {
+      try {
+        // For "October 16, 2025 9:10 AM" format
+        if (str.match(/^[A-Za-z]+ \d+, \d{4} \d+:\d+ [AP]M$/)) {
+          return luxon.DateTime.fromFormat(str, 'MMMM d, yyyy h:mm a', { 
+            zone: 'America/Los_Angeles' 
+          }).toJSDate();
+        }
+        
+        // For ISO formats
+        let iso = normalizeToIso(str);
+        if (!/[Zz]|[+\-]\d{2}:?\d{2}$/.test(iso)) {
+          // Treat as LA time if no timezone specified
+          return luxon.DateTime.fromISO(iso, { zone: 'America/Los_Angeles' }).toJSDate();
+        }
+        return luxon.DateTime.fromISO(iso, { zone: 'America/Los_Angeles' }).toJSDate();
+      } catch (e) {
+        console.warn('Luxon parsing failed, using fallback:', e);
+      }
+    }
+    
+    // Fallback to original logic
     if (str.includes("October") || str.includes("November") || str.includes("December") || 
         str.includes("January") || str.includes("February") || str.includes("March") ||
         str.includes("April") || str.includes("May") || str.includes("June") ||
@@ -112,8 +134,8 @@ document.addEventListener("DOMContentLoaded", function () {
   function renderOne(session){
     const startAttr=session.getAttribute("data-start-time");
     const endAttr=session.getAttribute("data-end-time");
-    const start=parseAsPDT(startAttr);
-    const end=parseAsPDT(endAttr);
+    const start=parseLATime(startAttr);
+    const end=parseLATime(endAttr);
     if(!start||!end)return;
     const startTime=start.toLocaleTimeString([],timeFmt);
     const endTime=end.toLocaleTimeString([],timeFmt);
@@ -130,7 +152,9 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   window.renderAllSessions=renderAllSessions;
-  window.parseAsPDT=parseAsPDT;
+  // Backward compatibility
+  window.parseAsPDT=parseLATime;
+  window.parseLATime=parseLATime;
 
   renderAllSessions();
   window.addEventListener("load",()=>{renderAllSessions();setTimeout(renderAllSessions,300);});
@@ -163,7 +187,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Only for comparison, not display
     parseToUtcTimestamp(timeStr){
       if(!timeStr)return null;
-      const date=parseAsPDT(timeStr); // ✅ use same logic, returns PDT Date
+      const date=parseLATime(timeStr); // ✅ use same logic, returns LA Date
       return date?date.getTime():null; // convert to UTC timestamp
     }
 
@@ -221,7 +245,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     parseToUtcTimestamp(timeStr){
       if(!timeStr)return null;
-      const date=parseAsPDT(timeStr);
+      const date=parseLATime(timeStr);
       return date?date.getTime():null;
     }
 
@@ -257,7 +281,7 @@ document.addEventListener("DOMContentLoaded", function () {
   window.liveManager=new LiveSessionsManager();
   
   /*───────────────────────────────
-   * Next Session Overlay (UTC compare via parseAsPDT)
+   * Next Session Overlay (UTC compare via parseLATime)
    *───────────────────────────────*/
   class NextSessionOverlayManager{
     constructor(){
@@ -281,7 +305,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     parseToUtcTimestamp(str){
-      const d=parseAsPDT(str);
+      const d=parseLATime(str);
       return d?d.getTime():null;
     }
 
@@ -425,7 +449,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   /*───────────────────────────────
-   * Additional Session Overlays (UTC compare via parseAsPDT)
+   * Additional Session Overlays (UTC compare via parseLATime)
    *───────────────────────────────*/
   class AdditionalSessionOverlayManager{
     constructor(){
@@ -449,7 +473,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     parseToUtcTimestamp(str){
-      const d=parseAsPDT(str);
+      const d=parseLATime(str);
       return d?d.getTime():null;
     }
 
