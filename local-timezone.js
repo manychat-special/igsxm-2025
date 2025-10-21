@@ -67,12 +67,12 @@ document.addEventListener("DOMContentLoaded", function () {
         const shortAbbr = now.toFormat('z');
         // If we get a meaningful abbreviation (not just offset), use it
         if (shortAbbr && !shortAbbr.match(/^[+-]\d{2}:\d{2}$/)) {
-          return shortAbbr;
+          return shortAbbr.replace(/_/g, ' ');
         }
         // Fallback to ZZZ format
         const mediumAbbr = now.toFormat('ZZZ');
         if (mediumAbbr && !mediumAbbr.match(/^[+-]\d{2}:\d{2}$/)) {
-          return mediumAbbr;
+          return mediumAbbr.replace(/_/g, ' ');
         }
       } catch (e) {
         console.warn('Luxon timezone detection failed, using fallback:', e);
