@@ -2,6 +2,9 @@ document.addEventListener("DOMContentLoaded", function () {
   const timeFmt = { hour: "2-digit", minute: "2-digit", hour12: false };
   const dateFmt = { month: "short", day: "numeric" };
 
+  // Check if Luxon is available
+  const hasLuxon = typeof luxon !== 'undefined';
+
   // Normalize "YYYY-MM-DD H:m[:ss]" → "YYYY-MM-DDTHH:mm:ss"
   function normalizeToIso(str) {
     if (!str) return null;
@@ -14,6 +17,19 @@ document.addEventListener("DOMContentLoaded", function () {
   // Parse as fixed PDT (UTC−07:00) if no timezone provided
   function parseAsPDT(str) {
     if (!str) return null;
+    
+    // Try Luxon first
+    if (hasLuxon) {
+      try {
+        let iso = normalizeToIso(str);
+        if (!/[Zz]|[+\-]\d{2}:?\d{2}$/.test(iso)) iso += "-07:00";
+        return luxon.DateTime.fromISO(iso, { zone: 'America/Los_Angeles' }).toJSDate();
+      } catch (e) {
+        console.warn('Luxon parsing failed, using fallback:', e);
+      }
+    }
+    
+    // Fallback to original logic
     let iso = normalizeToIso(str);
     if (!/[Zz]|[+\-]\d{2}:?\d{2}$/.test(iso)) iso += "-07:00";
     const d = new Date(iso);
@@ -23,8 +39,18 @@ document.addEventListener("DOMContentLoaded", function () {
   // Make parseAsPDT available globally for other scripts
   window.parseAsPDT = parseAsPDT;
 
-  // Return local timezone abbreviation (fixed for Oct 22–23, 2025)
+  // Return local timezone abbreviation with Luxon fallback
   function getUserTzAbbr() {
+    // Try Luxon first
+    if (hasLuxon) {
+      try {
+        return luxon.DateTime.now().toFormat('ZZZZ');
+      } catch (e) {
+        console.warn('Luxon timezone detection failed, using fallback:', e);
+      }
+    }
+    
+    // Fallback to original hardcoded logic
     const tzIana = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     // Europe (DST still active in late Oct)
@@ -73,33 +99,66 @@ document.addEventListener("DOMContentLoaded", function () {
     if (el && el.textContent !== val) el.textContent = val;
   }
 
-  // Render one session
+  // Render one session with Luxon support
   function renderOne(session) {
     const startAttr = session.getAttribute("data-start-time");
     const endAttr   = session.getAttribute("data-end-time");
     
-    // Use new Date() for October format, parseAsPDT for YYYY-MM-DD format
     let start, end;
-    if (startAttr && startAttr.includes('October')) {
-      // For October format, manually add PDT timezone
-      const isoStart = startAttr.replace('October', '2025-10').replace(' AM', '').replace(' PM', '');
-      const [datePart, timePart] = isoStart.split(' ');
-      const [month, day] = datePart.split(' ');
-      const formattedStart = `2025-10-${day.padStart(2, '0')}T${timePart}-07:00`;
-      start = new Date(formattedStart);
-    } else {
-      start = parseAsPDT(startAttr);
+    
+    // Try Luxon first for better timezone handling
+    if (hasLuxon) {
+      try {
+        if (startAttr && startAttr.includes('October')) {
+          // Handle October format with Luxon
+          const isoStart = startAttr.replace('October', '2025-10').replace(' AM', '').replace(' PM', '');
+          const [datePart, timePart] = isoStart.split(' ');
+          const [month, day] = datePart.split(' ');
+          const formattedStart = `2025-10-${day.padStart(2, '0')}T${timePart}`;
+          start = luxon.DateTime.fromISO(formattedStart, { zone: 'America/Los_Angeles' }).toJSDate();
+        } else {
+          start = parseAsPDT(startAttr);
+        }
+        
+        if (endAttr && endAttr.includes('October')) {
+          // Handle October format with Luxon
+          const isoEnd = endAttr.replace('October', '2025-10').replace(' AM', '').replace(' PM', '');
+          const [datePart, timePart] = isoEnd.split(' ');
+          const [month, day] = datePart.split(' ');
+          const formattedEnd = `2025-10-${day.padStart(2, '0')}T${timePart}`;
+          end = luxon.DateTime.fromISO(formattedEnd, { zone: 'America/Los_Angeles' }).toJSDate();
+        } else {
+          end = parseAsPDT(endAttr);
+        }
+      } catch (e) {
+        console.warn('Luxon rendering failed, using fallback:', e);
+        // Fall through to original logic
+      }
     }
     
-    if (endAttr && endAttr.includes('October')) {
-      // For October format, manually add PDT timezone
-      const isoEnd = endAttr.replace('October', '2025-10').replace(' AM', '').replace(' PM', '');
-      const [datePart, timePart] = isoEnd.split(' ');
-      const [month, day] = datePart.split(' ');
-      const formattedEnd = `2025-10-${day.padStart(2, '0')}T${timePart}-07:00`;
-      end = new Date(formattedEnd);
-    } else {
-      end = parseAsPDT(endAttr);
+    // Fallback to original logic if Luxon failed or not available
+    if (!start || !end) {
+      if (startAttr && startAttr.includes('October')) {
+        // For October format, manually add PDT timezone
+        const isoStart = startAttr.replace('October', '2025-10').replace(' AM', '').replace(' PM', '');
+        const [datePart, timePart] = isoStart.split(' ');
+        const [month, day] = datePart.split(' ');
+        const formattedStart = `2025-10-${day.padStart(2, '0')}T${timePart}-07:00`;
+        start = new Date(formattedStart);
+      } else {
+        start = parseAsPDT(startAttr);
+      }
+      
+      if (endAttr && endAttr.includes('October')) {
+        // For October format, manually add PDT timezone
+        const isoEnd = endAttr.replace('October', '2025-10').replace(' AM', '').replace(' PM', '');
+        const [datePart, timePart] = isoEnd.split(' ');
+        const [month, day] = datePart.split(' ');
+        const formattedEnd = `2025-10-${day.padStart(2, '0')}T${timePart}-07:00`;
+        end = new Date(formattedEnd);
+      } else {
+        end = parseAsPDT(endAttr);
+      }
     }
     
     if (!start || !end) return;
