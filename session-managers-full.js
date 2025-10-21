@@ -944,7 +944,8 @@ document.addEventListener("DOMContentLoaded", function () {
       this.feedbackElement = document.querySelector('[data-session-feedback]');
       if (!this.feedbackElement) return;
       
-      this.feedbackElement.classList.add('hide');
+      // Check time first, then decide whether to hide or show
+      this.updateFeedbackVisibility();
       this.startChecking();
     }
 
