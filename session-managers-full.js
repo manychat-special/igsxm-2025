@@ -448,12 +448,12 @@ document.addEventListener("DOMContentLoaded", function () {
       
       const linkElement=this.overlayElement.querySelector('[data-next-redirect-link]');
       const titleElement=this.overlayElement.querySelector('[data-next-redirect-title]');
-      const coverElement=this.overlayElement.querySelector('[data-next-redirect-cover]');
+      const coverElements=this.overlayElement.querySelectorAll('[data-next-redirect-cover]');
 
       console.log('NextSessionOverlayManager: elements found -', {
         linkElement: !!linkElement,
         titleElement: !!titleElement,
-        coverElement: !!coverElement
+        coverElements: coverElements.length
       });
 
       if(linkElement){
@@ -553,16 +553,20 @@ document.addEventListener("DOMContentLoaded", function () {
       
       console.log('NextSessionOverlayManager: image found:', imgElement.src);
       
-      // Update cover element
-      const coverElement = this.overlayElement.querySelector('[data-next-redirect-cover]');
-      if (!coverElement) {
-        console.log('NextSessionOverlayManager: no [data-next-redirect-cover] element found');
+      // Update ALL cover elements
+      const coverElements = this.overlayElement.querySelectorAll('[data-next-redirect-cover]');
+      if (coverElements.length === 0) {
+        console.log('NextSessionOverlayManager: no [data-next-redirect-cover] elements found');
         return;
       }
       
-      coverElement.src = imgElement.src;
-      coverElement.alt = imgElement.alt || 'Next session';
-      console.log('NextSessionOverlayManager: cover updated to:', imgElement.src);
+      console.log('NextSessionOverlayManager: found', coverElements.length, 'cover elements');
+      
+      coverElements.forEach((coverElement, index) => {
+        coverElement.src = imgElement.src;
+        coverElement.alt = imgElement.alt || 'Next session';
+        console.log(`NextSessionOverlayManager: cover ${index + 1} updated to:`, imgElement.src);
+      });
     }
 
     destroy(){
