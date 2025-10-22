@@ -1,5 +1,6 @@
 /*───────────────────────────────
  * Unified Time + Upcoming Manager
+ * Version: 0.1
  *───────────────────────────────*/
 
 // Global configuration
