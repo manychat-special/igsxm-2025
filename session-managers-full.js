@@ -372,7 +372,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const secondsBeforeEnd = parseInt(this.overlayElement.getAttribute('data-next-redirect')) || 15;
       const showTimeUtc = endUtc - (secondsBeforeEnd * 1000);
       
-      if (nowUtc >= showTimeUtc) {
+      if (nowUtc >= showTimeUtc && nowUtc < endUtc) {
         const sessionId = currentSessionElement.getAttribute('data-agenda-item');
         if (!this.shownSessions.has(sessionId)) {
           this.shownSessions.add(sessionId);
