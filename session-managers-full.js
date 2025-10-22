@@ -341,7 +341,7 @@ document.addEventListener("DOMContentLoaded", function () {
     init(){
       this.overlayElement=document.querySelector('[data-next-redirect]');
       if(!this.overlayElement)return;
-      this.overlayElement.style.display='none';
+      this.overlayElement.classList.add('hide');
       this.startChecking();
     }
 
@@ -372,14 +372,13 @@ document.addEventListener("DOMContentLoaded", function () {
       const secondsBeforeEnd = parseInt(this.overlayElement.getAttribute('data-next-redirect')) || 15;
       const showTimeUtc = endUtc - (secondsBeforeEnd * 1000);
       
-      // TEMPORARILY DISABLED FOR TESTING - Show overlay immediately
-      // if (nowUtc >= showTimeUtc && nowUtc < endUtc) {
+      if (nowUtc >= showTimeUtc && nowUtc < endUtc) {
         const sessionId = currentSessionElement.getAttribute('data-agenda-item');
         if (!this.shownSessions.has(sessionId)) {
           this.shownSessions.add(sessionId);
           this.showOverlay(currentSessionElement);
         }
-      // }
+      }
     }
 
     getNextSession(endedSessionElement){
@@ -427,8 +426,7 @@ document.addEventListener("DOMContentLoaded", function () {
         titleElement.style.display='';
       }
 
-      this.overlayElement.style.display='none';
-      this.overlayElement.style.display='flex';
+      this.overlayElement.classList.remove('hide');
       this.setupCancelButton();
       this.animateOverlayIn();
 
@@ -484,7 +482,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     hideOverlay(){
-      if(this.overlayElement){this.overlayElement.style.display='none';}
+      if(this.overlayElement){this.overlayElement.classList.add('hide');}
       if(this.currentTimer){clearTimeout(this.currentTimer);this.currentTimer=null;}
       if(this.progressTimer){clearTimeout(this.progressTimer);this.progressTimer=null;}
     }
