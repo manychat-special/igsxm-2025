@@ -946,7 +946,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     init() {
       this.countdownElement = document.querySelector('[data-start-countdown]');
-      if (!this.countdownElement) return;
+      console.log('StartCountdownManager: init, countdownElement:', this.countdownElement);
+      if (!this.countdownElement) {
+        console.log('StartCountdownManager: no [data-start-countdown] element found');
+        return;
+      }
       
       this.updateCountdown();
       this.startPeriodicUpdates();
@@ -962,8 +966,12 @@ document.addEventListener("DOMContentLoaded", function () {
     updateCountdown() {
       if (!this.countdownElement) return;
       
+      console.log('StartCountdownManager: updateCountdown called');
+      
       // Find all sessions and get the first upcoming one
       const allSessions = document.querySelectorAll('[data-agenda-item]');
+      console.log('StartCountdownManager: found sessions:', allSessions.length);
+      
       const sessions = Array.from(allSessions).map(el => ({
         element: el,
         startUtc: parseToUtcTimestamp(el.getAttribute('data-start-time'))
@@ -973,7 +981,10 @@ document.addEventListener("DOMContentLoaded", function () {
         .filter(s => s.startUtc && s.startUtc > Date.now())
         .sort((a, b) => a.startUtc - b.startUtc);
 
+      console.log('StartCountdownManager: upcoming sessions:', upcomingSessions.length);
+
       if (upcomingSessions.length === 0) {
+        console.log('StartCountdownManager: no upcoming sessions, hiding countdown');
         this.countdownElement.style.display = 'none';
         return;
       }
@@ -982,8 +993,12 @@ document.addEventListener("DOMContentLoaded", function () {
       const nowUtc = Date.now();
       const timeDiff = firstSession.startUtc - nowUtc;
 
+      console.log('StartCountdownManager: first session element:', firstSession.element);
+      console.log('StartCountdownManager: time diff (ms):', timeDiff);
+
       // Hide if less than 30 seconds remaining
       if (timeDiff <= 30000) {
+        console.log('StartCountdownManager: less than 30s remaining, hiding countdown');
         this.countdownElement.style.display = 'none';
         return;
       }
@@ -1006,14 +1021,20 @@ document.addEventListener("DOMContentLoaded", function () {
       this.countdownElement.innerHTML = countdownText;
       
       // Update next session cover
+      console.log('StartCountdownManager: calling updateNextSessionCover');
       this.updateNextSessionCover(firstSession.element);
     }
     
     updateNextSessionCover(nextSessionElement) {
-      if (!nextSessionElement) return;
+      console.log('updateNextSessionCover: called with element:', nextSessionElement);
+      if (!nextSessionElement) {
+        console.log('updateNextSessionCover: no element provided');
+        return;
+      }
       
       // Find image in the next session
       const imgElement = nextSessionElement.querySelector('img');
+      console.log('updateNextSessionCover: found img element:', imgElement);
       if (!imgElement) {
         console.log('No image found in next session');
         return;
@@ -1021,11 +1042,13 @@ document.addEventListener("DOMContentLoaded", function () {
       
       // Update cover element
       const coverElement = document.querySelector('[data-next-session-cover]');
+      console.log('updateNextSessionCover: found cover element:', coverElement);
       if (!coverElement) {
         console.log('No [data-next-session-cover] element found');
         return;
       }
       
+      console.log('updateNextSessionCover: setting src to:', imgElement.src);
       coverElement.src = imgElement.src;
       coverElement.alt = imgElement.alt || 'Next session';
       console.log('Updated cover image:', imgElement.src);
