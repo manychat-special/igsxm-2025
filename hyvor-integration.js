@@ -29,9 +29,12 @@ window.$memberstackDom.getCurrentMember().then(async ({ data }) => {
         comments.setAttribute('colors', container.dataset.theme);
     }
     
-    // Set top_widget from container data attribute
+    // Set top_widget from container data attribute via settings
     if (container && container.dataset.widgets) {
-        comments.setAttribute('top_widget', container.dataset.widgets);
+        const settings = {
+            top_widget: container.dataset.widgets
+        };
+        comments.setAttribute('settings', JSON.stringify(settings));
     }
     
     comments.setAttribute('t-comment-button-text', '↑');
