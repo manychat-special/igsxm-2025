@@ -367,8 +367,12 @@ document.addEventListener("DOMContentLoaded", function () {
       const nowUtc = Date.now();
       const endUtc = this.parseToUtcTimestamp(endTimeStr);
       if (endUtc == null) return;
-      const timeDiff = Math.abs(nowUtc - endUtc);
-      if (timeDiff <= CONFIG.timeDiffThreshold) {
+      
+      // Get seconds before end from data-next-redirect attribute
+      const secondsBeforeEnd = parseInt(this.overlayElement.getAttribute('data-next-redirect')) || 15;
+      const showTimeUtc = endUtc - (secondsBeforeEnd * 1000);
+      
+      if (nowUtc >= showTimeUtc) {
         const sessionId = currentSessionElement.getAttribute('data-agenda-item');
         if (!this.shownSessions.has(sessionId)) {
           this.shownSessions.add(sessionId);
@@ -472,7 +476,8 @@ document.addEventListener("DOMContentLoaded", function () {
         progressElement.style.width='100%';
         this.progressTimer=setTimeout(()=>{
           clearInterval(countdownInterval);
-          if(linkElement&&linkElement.href){window.location.href=linkElement.href;}
+          // Automatic redirect disabled - user can click manually
+          // if(linkElement&&linkElement.href){window.location.href=linkElement.href;}
         },durationMs);
       },100);
     }
