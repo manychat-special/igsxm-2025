@@ -345,3 +345,12 @@ background-color: var(--ht-color-accent-15);
   font-size: 0.75em;
   color:rgba(255, 255, 255, 0.5)
 }
+
+/* ========================================
+   LOAD MORE
+   ======================================== */
+
+.load-more > * {
+  width: auto !important;
+  height: auto !important;
+}
