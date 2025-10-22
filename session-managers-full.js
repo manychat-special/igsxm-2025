@@ -339,44 +339,35 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     init(){
-      console.log('NextSessionOverlayManager: init called');
       this.overlayElement=document.querySelector('[data-next-redirect]');
       if(!this.overlayElement){
-        console.log('NextSessionOverlayManager: [data-next-redirect] element not found');
         return;
       }
-      console.log('NextSessionOverlayManager: overlay element found');
       
       // Get current session info once at initialization
       this.currentSlug = this.getCurrentSessionSlug();
       if (!this.currentSlug) {
-        console.log('NextSessionOverlayManager: no current session slug found');
         return;
       }
       
       this.currentSessionElement = document.querySelector(`[data-agenda-item="${this.currentSlug}"]`);
       if (!this.currentSessionElement) {
-        console.log('NextSessionOverlayManager: current session element not found');
         return;
       }
       
       const endTimeStr = this.currentSessionElement.getAttribute('data-end-time');
       if (!endTimeStr) {
-        console.log('NextSessionOverlayManager: no end time found for current session');
         return;
       }
       
       this.endUtc = this.parseToUtcTimestamp(endTimeStr);
       if (this.endUtc == null) {
-        console.log('NextSessionOverlayManager: failed to parse end time');
         return;
       }
       
       // Get seconds before end from data-next-redirect attribute
       this.secondsBeforeEnd = parseInt(this.overlayElement.getAttribute('data-next-redirect')) || 15;
       this.showTimeUtc = this.endUtc - (this.secondsBeforeEnd * 1000);
-      
-      console.log('NextSessionOverlayManager: initialized for session', this.currentSlug, 'ending at', new Date(this.endUtc));
       
       this.startChecking();
     }
@@ -431,30 +422,18 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     showOverlay(endedSessionElement){
-      console.log('NextSessionOverlayManager: showOverlay called');
-      
       if(!this.overlayElement){
-        console.log('NextSessionOverlayManager: overlay element not found');
         return;
       }
       
       const nextSession=this.getNextSession(endedSessionElement);
       if(!nextSession){
-        console.log('NextSessionOverlayManager: no next session found');
         return;
       }
-      
-      console.log('NextSessionOverlayManager: next session found:', nextSession.title);
       
       const linkElement=this.overlayElement.querySelector('[data-next-redirect-link]');
       const titleElement=this.overlayElement.querySelector('[data-next-redirect-title]');
       const coverElements=this.overlayElement.querySelectorAll('[data-next-redirect-cover]');
-
-      console.log('NextSessionOverlayManager: elements found -', {
-        linkElement: !!linkElement,
-        titleElement: !!titleElement,
-        coverElements: coverElements.length
-      });
 
       if(linkElement){
         const currentUrl=window.location.href;
@@ -463,13 +442,11 @@ document.addEventListener("DOMContentLoaded", function () {
         const newUrl=urlParts.join('/');
         linkElement.href=newUrl;
         linkElement.style.display='';
-        console.log('NextSessionOverlayManager: link updated to:', newUrl);
       }
       
       if(titleElement){
         titleElement.textContent=nextSession.title;
         titleElement.style.display='';
-        console.log('NextSessionOverlayManager: title updated to:', nextSession.title);
       }
       
       // Update cover image
@@ -524,8 +501,8 @@ document.addEventListener("DOMContentLoaded", function () {
         progressElement.style.width='100%';
         this.progressTimer=setTimeout(()=>{
           clearInterval(countdownInterval);
-          // Automatic redirect disabled - user can click manually
-          // if(linkElement&&linkElement.href){window.location.href=linkElement.href;}
+          // Hide overlay after time expires
+          this.hideOverlay();
         },durationMs);
       },100);
     }
@@ -537,35 +514,25 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     updateNextSessionCover(nextSessionElement) {
-      console.log('NextSessionOverlayManager: updateNextSessionCover called');
-      
       if (!nextSessionElement) {
-        console.log('NextSessionOverlayManager: no next session element provided');
         return;
       }
       
       // Find image in the next session
       const imgElement = nextSessionElement.querySelector('img');
       if (!imgElement) {
-        console.log('NextSessionOverlayManager: no image found in next session');
         return;
       }
-      
-      console.log('NextSessionOverlayManager: image found:', imgElement.src);
       
       // Update ALL cover elements
       const coverElements = this.overlayElement.querySelectorAll('[data-next-redirect-cover]');
       if (coverElements.length === 0) {
-        console.log('NextSessionOverlayManager: no [data-next-redirect-cover] elements found');
         return;
       }
       
-      console.log('NextSessionOverlayManager: found', coverElements.length, 'cover elements');
-      
-      coverElements.forEach((coverElement, index) => {
+      coverElements.forEach((coverElement) => {
         coverElement.src = imgElement.src;
         coverElement.alt = imgElement.alt || 'Next session';
-        console.log(`NextSessionOverlayManager: cover ${index + 1} updated to:`, imgElement.src);
       });
     }
 
