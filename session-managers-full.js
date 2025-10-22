@@ -1007,7 +1007,7 @@ document.addEventListener("DOMContentLoaded", function () {
       this.countdownElement.innerHTML = countdownText;
       
       // Update next session cover
-      this.updateNextSessionCover(upcomingSessions[0]);
+      this.updateNextSessionCover(firstSession.element);
     }
     
     updateNextSessionCover(nextSessionElement) {
@@ -1015,14 +1015,21 @@ document.addEventListener("DOMContentLoaded", function () {
       
       // Find image in the next session
       const imgElement = nextSessionElement.querySelector('img');
-      if (!imgElement) return;
+      if (!imgElement) {
+        console.log('No image found in next session');
+        return;
+      }
       
       // Update cover element
       const coverElement = document.querySelector('[data-next-session-cover]');
-      if (coverElement) {
-        coverElement.src = imgElement.src;
-        coverElement.alt = imgElement.alt || 'Next session';
+      if (!coverElement) {
+        console.log('No [data-next-session-cover] element found');
+        return;
       }
+      
+      coverElement.src = imgElement.src;
+      coverElement.alt = imgElement.alt || 'Next session';
+      console.log('Updated cover image:', imgElement.src);
     }
 
     destroy() {
