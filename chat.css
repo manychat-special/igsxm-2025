@@ -302,6 +302,8 @@ background-color: var(--ht-color-accent-15);
   text-transform: uppercase;
   color: var(--ht-color-accent);
   backdrop-filter: blur(20px);
+  margin-bottom: 4px;
+  min-width: 58px;
 }
 
 .reaction.reacted {
@@ -322,12 +324,18 @@ background-color: var(--ht-color-accent-15);
   position: sticky;
   top: 0;
   z-index: 9999;
-  margin-bottom: 10px
+  margin-bottom: 10px;
+  padding-top: 2px;
+  padding-left: 2px;
+}
+
+.reactions {
+  justify-content: flex-start;
 }
 
 .reaction img {
-  width: 24px;
-  height: 24px;
+  width: 18px;
+  height: 18px;
   margin-inline-end: 6px;
 }
 
