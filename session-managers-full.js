@@ -931,6 +931,85 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   /*───────────────────────────────
+   * Start Countdown Manager (data-start-countdown)
+   *───────────────────────────────*/
+  class StartCountdownManager {
+    constructor() {
+      this.countdownElement = null;
+      this.updateInterval = null;
+      this.init();
+    }
+
+    init() {
+      this.countdownElement = document.querySelector('[data-start-countdown]');
+      if (!this.countdownElement) return;
+      
+      this.updateCountdown();
+      this.startPeriodicUpdates();
+    }
+
+    startPeriodicUpdates() {
+      // Update every 30 seconds - consistent with other managers
+      this.updateInterval = setInterval(() => {
+        this.updateCountdown();
+      }, CONFIG.checkInterval);
+    }
+
+    updateCountdown() {
+      if (!this.countdownElement) return;
+      
+      // Find all sessions and get the first upcoming one
+      const allSessions = document.querySelectorAll('[data-agenda-item]');
+      const sessions = Array.from(allSessions).map(el => ({
+        element: el,
+        startUtc: parseToUtcTimestamp(el.getAttribute('data-start-time'))
+      }));
+
+      const upcomingSessions = sessions
+        .filter(s => s.startUtc && s.startUtc > Date.now())
+        .sort((a, b) => a.startUtc - b.startUtc);
+
+      if (upcomingSessions.length === 0) {
+        this.countdownElement.style.display = 'none';
+        return;
+      }
+
+      const firstSession = upcomingSessions[0];
+      const nowUtc = Date.now();
+      const timeDiff = firstSession.startUtc - nowUtc;
+
+      // Hide if less than 30 seconds remaining
+      if (timeDiff <= 30000) {
+        this.countdownElement.style.display = 'none';
+        return;
+      }
+
+      // Show countdown
+      this.countdownElement.style.display = '';
+      
+      const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+      const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+
+      let countdownText = '';
+      if (hours > 0) {
+        countdownText = `We start in ${hours}h. `;
+      } else if (minutes > 0) {
+        countdownText = `We start in ${minutes}m. `;
+      } else {
+        countdownText = 'We start in <1m. ';
+      }
+
+      this.countdownElement.textContent = countdownText;
+    }
+
+    destroy() {
+      if (this.updateInterval) {
+        clearInterval(this.updateInterval);
+      }
+    }
+  }
+
+  /*───────────────────────────────
    * Feedback Manager (data-session-feedback)
    *───────────────────────────────*/
   class FeedbackManager {
@@ -1005,4 +1084,5 @@ document.addEventListener("DOMContentLoaded", function () {
   window.additionalSessionOverlayManager=new AdditionalSessionOverlayManager();
   window.nestedCollectionsManager=new NestedCollectionsManager();
   window.feedbackManager=new FeedbackManager();
+  window.startCountdownManager=new StartCountdownManager();
 });
