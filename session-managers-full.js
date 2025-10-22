@@ -501,8 +501,8 @@ document.addEventListener("DOMContentLoaded", function () {
         progressElement.style.width='100%';
         this.progressTimer=setTimeout(()=>{
           clearInterval(countdownInterval);
-          // Hide overlay after time expires
-          this.hideOverlay();
+          // Hide overlay after time expires with animation
+          this.hideOverlayWithAnimation();
         },durationMs);
       },100);
     }
