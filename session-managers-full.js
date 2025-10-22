@@ -368,17 +368,18 @@ document.addEventListener("DOMContentLoaded", function () {
       const endUtc = this.parseToUtcTimestamp(endTimeStr);
       if (endUtc == null) return;
       
+      // TEMPORARILY DISABLED - Show overlay always for testing
       // Get seconds before end from data-next-redirect attribute
-      const secondsBeforeEnd = parseInt(this.overlayElement.getAttribute('data-next-redirect')) || 15;
-      const showTimeUtc = endUtc - (secondsBeforeEnd * 1000);
+      // const secondsBeforeEnd = parseInt(this.overlayElement.getAttribute('data-next-redirect')) || 15;
+      // const showTimeUtc = endUtc - (secondsBeforeEnd * 1000);
       
-      if (nowUtc >= showTimeUtc && nowUtc < endUtc) {
+      // if (nowUtc >= showTimeUtc && nowUtc < endUtc) {
         const sessionId = currentSessionElement.getAttribute('data-agenda-item');
         if (!this.shownSessions.has(sessionId)) {
           this.shownSessions.add(sessionId);
           this.showOverlay(currentSessionElement);
         }
-      }
+      // }
     }
 
     getNextSession(endedSessionElement){
@@ -983,12 +984,11 @@ document.addEventListener("DOMContentLoaded", function () {
       const nowUtc = Date.now();
       const timeDiff = firstSession.startUtc - nowUtc;
 
-      // Temporarily commented out time-based logic - always show
       // Hide if less than 30 seconds remaining
-      // if (timeDiff <= 30000) {
-      //   this.countdownElement.style.display = 'none';
-      //   return;
-      // }
+      if (timeDiff <= 30000) {
+        this.countdownElement.style.display = 'none';
+        return;
+      }
 
       // Show countdown
       this.countdownElement.style.display = '';
