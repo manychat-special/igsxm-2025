@@ -339,9 +339,45 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     init(){
+      console.log('NextSessionOverlayManager: init called');
       this.overlayElement=document.querySelector('[data-next-redirect]');
-      if(!this.overlayElement)return;
-      this.overlayElement.classList.add('hide');
+      if(!this.overlayElement){
+        console.log('NextSessionOverlayManager: [data-next-redirect] element not found');
+        return;
+      }
+      console.log('NextSessionOverlayManager: overlay element found');
+      
+      // Get current session info once at initialization
+      this.currentSlug = this.getCurrentSessionSlug();
+      if (!this.currentSlug) {
+        console.log('NextSessionOverlayManager: no current session slug found');
+        return;
+      }
+      
+      this.currentSessionElement = document.querySelector(`[data-agenda-item="${this.currentSlug}"]`);
+      if (!this.currentSessionElement) {
+        console.log('NextSessionOverlayManager: current session element not found');
+        return;
+      }
+      
+      const endTimeStr = this.currentSessionElement.getAttribute('data-end-time');
+      if (!endTimeStr) {
+        console.log('NextSessionOverlayManager: no end time found for current session');
+        return;
+      }
+      
+      this.endUtc = this.parseToUtcTimestamp(endTimeStr);
+      if (this.endUtc == null) {
+        console.log('NextSessionOverlayManager: failed to parse end time');
+        return;
+      }
+      
+      // Get seconds before end from data-next-redirect attribute
+      this.secondsBeforeEnd = parseInt(this.overlayElement.getAttribute('data-next-redirect')) || 15;
+      this.showTimeUtc = this.endUtc - (this.secondsBeforeEnd * 1000);
+      
+      console.log('NextSessionOverlayManager: initialized for session', this.currentSlug, 'ending at', new Date(this.endUtc));
+      
       this.startChecking();
     }
 
@@ -358,25 +394,13 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     checkForSessionEnd() {
-      const currentSlug = this.getCurrentSessionSlug();
-      if (!currentSlug) return;
-      const currentSessionElement = document.querySelector(`[data-agenda-item="${currentSlug}"]`);
-      if (!currentSessionElement) return;
-      const endTimeStr = currentSessionElement.getAttribute('data-end-time');
-      if (!endTimeStr) return;
       const nowUtc = Date.now();
-      const endUtc = this.parseToUtcTimestamp(endTimeStr);
-      if (endUtc == null) return;
       
-      // Get seconds before end from data-next-redirect attribute
-      const secondsBeforeEnd = parseInt(this.overlayElement.getAttribute('data-next-redirect')) || 15;
-      const showTimeUtc = endUtc - (secondsBeforeEnd * 1000);
-      
-      if (nowUtc >= showTimeUtc && nowUtc < endUtc) {
-        const sessionId = currentSessionElement.getAttribute('data-agenda-item');
+      if (nowUtc >= this.showTimeUtc && nowUtc < this.endUtc) {
+        const sessionId = this.currentSessionElement.getAttribute('data-agenda-item');
         if (!this.shownSessions.has(sessionId)) {
           this.shownSessions.add(sessionId);
-          this.showOverlay(currentSessionElement);
+          this.showOverlay(this.currentSessionElement);
         }
       }
     }
@@ -407,11 +431,30 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     showOverlay(endedSessionElement){
-      if(!this.overlayElement)return;
+      console.log('NextSessionOverlayManager: showOverlay called');
+      
+      if(!this.overlayElement){
+        console.log('NextSessionOverlayManager: overlay element not found');
+        return;
+      }
+      
       const nextSession=this.getNextSession(endedSessionElement);
-      if(!nextSession)return;
+      if(!nextSession){
+        console.log('NextSessionOverlayManager: no next session found');
+        return;
+      }
+      
+      console.log('NextSessionOverlayManager: next session found:', nextSession.title);
+      
       const linkElement=this.overlayElement.querySelector('[data-next-redirect-link]');
       const titleElement=this.overlayElement.querySelector('[data-next-redirect-title]');
+      const coverElement=this.overlayElement.querySelector('[data-next-redirect-cover]');
+
+      console.log('NextSessionOverlayManager: elements found -', {
+        linkElement: !!linkElement,
+        titleElement: !!titleElement,
+        coverElement: !!coverElement
+      });
 
       if(linkElement){
         const currentUrl=window.location.href;
@@ -420,11 +463,17 @@ document.addEventListener("DOMContentLoaded", function () {
         const newUrl=urlParts.join('/');
         linkElement.href=newUrl;
         linkElement.style.display='';
+        console.log('NextSessionOverlayManager: link updated to:', newUrl);
       }
+      
       if(titleElement){
         titleElement.textContent=nextSession.title;
         titleElement.style.display='';
+        console.log('NextSessionOverlayManager: title updated to:', nextSession.title);
       }
+      
+      // Update cover image
+      this.updateNextSessionCover(nextSession.element);
 
       this.overlayElement.classList.remove('hide');
       this.setupCancelButton();
@@ -485,6 +534,35 @@ document.addEventListener("DOMContentLoaded", function () {
       if(this.overlayElement){this.overlayElement.classList.add('hide');}
       if(this.currentTimer){clearTimeout(this.currentTimer);this.currentTimer=null;}
       if(this.progressTimer){clearTimeout(this.progressTimer);this.progressTimer=null;}
+    }
+
+    updateNextSessionCover(nextSessionElement) {
+      console.log('NextSessionOverlayManager: updateNextSessionCover called');
+      
+      if (!nextSessionElement) {
+        console.log('NextSessionOverlayManager: no next session element provided');
+        return;
+      }
+      
+      // Find image in the next session
+      const imgElement = nextSessionElement.querySelector('img');
+      if (!imgElement) {
+        console.log('NextSessionOverlayManager: no image found in next session');
+        return;
+      }
+      
+      console.log('NextSessionOverlayManager: image found:', imgElement.src);
+      
+      // Update cover element
+      const coverElement = this.overlayElement.querySelector('[data-next-redirect-cover]');
+      if (!coverElement) {
+        console.log('NextSessionOverlayManager: no [data-next-redirect-cover] element found');
+        return;
+      }
+      
+      coverElement.src = imgElement.src;
+      coverElement.alt = imgElement.alt || 'Next session';
+      console.log('NextSessionOverlayManager: cover updated to:', imgElement.src);
     }
 
     destroy(){
@@ -946,11 +1024,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     init() {
       this.countdownElement = document.querySelector('[data-start-countdown]');
-      console.log('StartCountdownManager: init, countdownElement:', this.countdownElement);
-      if (!this.countdownElement) {
-        console.log('StartCountdownManager: no [data-start-countdown] element found');
-        return;
-      }
+      if (!this.countdownElement) return;
       
       this.updateCountdown();
       this.startPeriodicUpdates();
@@ -966,12 +1040,8 @@ document.addEventListener("DOMContentLoaded", function () {
     updateCountdown() {
       if (!this.countdownElement) return;
       
-      console.log('StartCountdownManager: updateCountdown called');
-      
       // Find all sessions and get the first upcoming one
       const allSessions = document.querySelectorAll('[data-agenda-item]');
-      console.log('StartCountdownManager: found sessions:', allSessions.length);
-      
       const sessions = Array.from(allSessions).map(el => ({
         element: el,
         startUtc: parseToUtcTimestamp(el.getAttribute('data-start-time'))
@@ -981,10 +1051,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .filter(s => s.startUtc && s.startUtc > Date.now())
         .sort((a, b) => a.startUtc - b.startUtc);
 
-      console.log('StartCountdownManager: upcoming sessions:', upcomingSessions.length);
-
       if (upcomingSessions.length === 0) {
-        console.log('StartCountdownManager: no upcoming sessions, hiding countdown');
         this.countdownElement.style.display = 'none';
         return;
       }
@@ -993,12 +1060,8 @@ document.addEventListener("DOMContentLoaded", function () {
       const nowUtc = Date.now();
       const timeDiff = firstSession.startUtc - nowUtc;
 
-      console.log('StartCountdownManager: first session element:', firstSession.element);
-      console.log('StartCountdownManager: time diff (ms):', timeDiff);
-
       // Hide if less than 30 seconds remaining
       if (timeDiff <= 30000) {
-        console.log('StartCountdownManager: less than 30s remaining, hiding countdown');
         this.countdownElement.style.display = 'none';
         return;
       }
@@ -1019,39 +1082,6 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       this.countdownElement.innerHTML = countdownText;
-      
-      // Update next session cover
-      console.log('StartCountdownManager: calling updateNextSessionCover');
-      this.updateNextSessionCover(firstSession.element);
-    }
-    
-    updateNextSessionCover(nextSessionElement) {
-      console.log('updateNextSessionCover: called with element:', nextSessionElement);
-      if (!nextSessionElement) {
-        console.log('updateNextSessionCover: no element provided');
-        return;
-      }
-      
-      // Find image in the next session
-      const imgElement = nextSessionElement.querySelector('img');
-      console.log('updateNextSessionCover: found img element:', imgElement);
-      if (!imgElement) {
-        console.log('No image found in next session');
-        return;
-      }
-      
-      // Update cover element
-      const coverElement = document.querySelector('[data-next-session-cover]');
-      console.log('updateNextSessionCover: found cover element:', coverElement);
-      if (!coverElement) {
-        console.log('No [data-next-session-cover] element found');
-        return;
-      }
-      
-      console.log('updateNextSessionCover: setting src to:', imgElement.src);
-      coverElement.src = imgElement.src;
-      coverElement.alt = imgElement.alt || 'Next session';
-      console.log('Updated cover image:', imgElement.src);
     }
 
     destroy() {
