@@ -1,6 +1,5 @@
 /*───────────────────────────────
  * Unified Time + Upcoming Manager
- * Version: 0.1
  *───────────────────────────────*/
 
 // Global configuration
@@ -993,14 +992,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
       let countdownText = '';
       if (hours > 0) {
-        countdownText = `We start in ${hours}h. `;
+        countdownText = `We start in ${hours}h.&nbsp;`;
       } else if (minutes > 0) {
-        countdownText = `We start in ${minutes}m. `;
+        countdownText = `We start in ${minutes}m.&nbsp;`;
       } else {
-        countdownText = 'We start in <1m. ';
+        countdownText = 'We start in <1m.&nbsp;';
       }
 
-      this.countdownElement.textContent = countdownText;
+      this.countdownElement.innerHTML = countdownText;
     }
 
     destroy() {
