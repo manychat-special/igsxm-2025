@@ -949,10 +949,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     startPeriodicUpdates() {
-      // Update every 30 seconds - consistent with other managers
+      // Update every 10 seconds for more accurate countdown
       this.updateInterval = setInterval(() => {
         this.updateCountdown();
-      }, CONFIG.checkInterval);
+      }, CONFIG.overlayCheckInterval);
     }
 
     updateCountdown() {
@@ -992,7 +992,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       let countdownText = '';
       if (hours > 0) {
-        countdownText = `We start in ${hours}h.&nbsp;`;
+        countdownText = `We start in ${hours}h ${minutes}m.&nbsp;`;
       } else if (minutes > 0) {
         countdownText = `We start in ${minutes}m.&nbsp;`;
       } else {
