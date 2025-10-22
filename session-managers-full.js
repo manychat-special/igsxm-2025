@@ -368,18 +368,17 @@ document.addEventListener("DOMContentLoaded", function () {
       const endUtc = this.parseToUtcTimestamp(endTimeStr);
       if (endUtc == null) return;
       
-      // TEMPORARILY DISABLED - Show overlay always for testing
       // Get seconds before end from data-next-redirect attribute
-      // const secondsBeforeEnd = parseInt(this.overlayElement.getAttribute('data-next-redirect')) || 15;
-      // const showTimeUtc = endUtc - (secondsBeforeEnd * 1000);
+      const secondsBeforeEnd = parseInt(this.overlayElement.getAttribute('data-next-redirect')) || 15;
+      const showTimeUtc = endUtc - (secondsBeforeEnd * 1000);
       
-      // if (nowUtc >= showTimeUtc && nowUtc < endUtc) {
+      if (nowUtc >= showTimeUtc && nowUtc < endUtc) {
         const sessionId = currentSessionElement.getAttribute('data-agenda-item');
         if (!this.shownSessions.has(sessionId)) {
           this.shownSessions.add(sessionId);
           this.showOverlay(currentSessionElement);
         }
-      // }
+      }
     }
 
     getNextSession(endedSessionElement){
