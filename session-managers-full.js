@@ -983,11 +983,12 @@ document.addEventListener("DOMContentLoaded", function () {
       const nowUtc = Date.now();
       const timeDiff = firstSession.startUtc - nowUtc;
 
+      // Temporarily commented out time-based logic - always show
       // Hide if less than 30 seconds remaining
-      if (timeDiff <= 30000) {
-        this.countdownElement.style.display = 'none';
-        return;
-      }
+      // if (timeDiff <= 30000) {
+      //   this.countdownElement.style.display = 'none';
+      //   return;
+      // }
 
       // Show countdown
       this.countdownElement.style.display = '';
