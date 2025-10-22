@@ -1005,6 +1005,24 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       this.countdownElement.innerHTML = countdownText;
+      
+      // Update next session cover
+      this.updateNextSessionCover(upcomingSessions[0]);
+    }
+    
+    updateNextSessionCover(nextSessionElement) {
+      if (!nextSessionElement) return;
+      
+      // Find image in the next session
+      const imgElement = nextSessionElement.querySelector('img');
+      if (!imgElement) return;
+      
+      // Update cover element
+      const coverElement = document.querySelector('[data-next-session-cover]');
+      if (coverElement) {
+        coverElement.src = imgElement.src;
+        coverElement.alt = imgElement.alt || 'Next session';
+      }
     }
 
     destroy() {
