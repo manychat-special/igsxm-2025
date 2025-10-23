@@ -1216,14 +1216,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // Initialize overlay managers
-  window.nextSessionOverlayManager=new NextSessionOverlayManager();
-  window.additionalSessionOverlayManager=new AdditionalSessionOverlayManager();
-  window.sessionStateManager=new SessionStateManager();
-  window.feedbackManager=new FeedbackManager();
-  window.startCountdownManager=new StartCountdownManager();
-  window.jumpToLiveManager=new JumpToLiveManager();
-
   /*───────────────────────────────
    * Replay Sessions Manager (Simple)
    *───────────────────────────────*/
@@ -1244,17 +1236,41 @@ document.addEventListener("DOMContentLoaded", function () {
       }
       
       const allSessions = document.querySelectorAll('[data-agenda-item]');
+      const visibleSessions = [];
       
       allSessions.forEach(session => {
         // Use existing SessionStateManager to get state
         const state = window.sessionStateManager ? window.sessionStateManager.getCurrentState(session) : null;
         
         // Show only sessions in "after" state
-        session.style.display = state === 'after' ? '' : 'none';
+        if (state === 'after') {
+          session.style.display = '';
+          visibleSessions.push(session);
+        } else {
+          session.style.display = 'none';
+        }
+      });
+      
+      // Hide day sections that have no visible sessions
+      const daySections = document.querySelectorAll('[data-day-section="day1"], [data-day-section="day2"]');
+      daySections.forEach(daySection => {
+        const sessionsInSection = daySection.querySelectorAll('[data-agenda-item]');
+        const hasVisibleSessions = Array.from(sessionsInSection).some(session => 
+          visibleSessions.includes(session)
+        );
+        
+        // Hide the entire day section if no visible sessions
+        daySection.style.display = hasVisibleSessions ? '' : 'none';
       });
     }
   }
 
-  // Initialize replay manager
-  window.replayManager = new ReplaySessionsManager();
+  // Initialize all managers
+  window.nextSessionOverlayManager=new NextSessionOverlayManager();
+  window.additionalSessionOverlayManager=new AdditionalSessionOverlayManager();
+  window.sessionStateManager=new SessionStateManager();
+  window.feedbackManager=new FeedbackManager();
+  window.startCountdownManager=new StartCountdownManager();
+  window.jumpToLiveManager=new JumpToLiveManager();
+  window.replayManager=new ReplaySessionsManager();
 });
