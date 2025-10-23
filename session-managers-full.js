@@ -1077,7 +1077,7 @@ document.addEventListener("DOMContentLoaded", function () {
       
       this.setupButton();
       this.showButton(); // Show immediately
-      this.updateButtonVisibility();
+      this.updateButtonVisibility(); // Then check live sessions
       this.startPeriodicUpdates();
     }
 
@@ -1164,7 +1164,7 @@ document.addEventListener("DOMContentLoaded", function () {
     showButton() {
       if (!this.jumpButton) return;
       
-      this.jumpButton.style.display = '';
+      this.jumpButton.classList.remove('hide');
       
       if (typeof gsap !== 'undefined') {
         gsap.fromTo(this.jumpButton, 
@@ -1184,11 +1184,11 @@ document.addEventListener("DOMContentLoaded", function () {
           duration: 0.3, 
           ease: "power2.in",
           onComplete: () => {
-            this.jumpButton.style.display = 'none';
+            this.jumpButton.classList.add('hide');
           }
         });
       } else {
-        this.jumpButton.style.display = 'none';
+        this.jumpButton.classList.add('hide');
       }
     }
 
