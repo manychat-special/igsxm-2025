@@ -1076,8 +1076,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!this.jumpButton) return;
       
       this.setupButton();
-      this.showButton(); // Show immediately
-      this.updateButtonVisibility(); // Then check live sessions
+      this.updateButtonVisibility(); // Check and show/hide based on live sessions
       this.startPeriodicUpdates();
     }
 
@@ -1154,24 +1153,16 @@ document.addEventListener("DOMContentLoaded", function () {
       
       const hasLiveSessions = this.getFirstLiveSession() !== null;
       
-      if (hasLiveSessions) {
-        this.showButton();
-      } else {
+      if (!hasLiveSessions) {
         this.hideButton();
       }
+      // If has live sessions, do nothing - button is already visible in HTML
     }
 
     showButton() {
       if (!this.jumpButton) return;
       
       this.jumpButton.classList.remove('hide');
-      
-      if (typeof gsap !== 'undefined') {
-        gsap.fromTo(this.jumpButton, 
-          { scale: 0, opacity: 0 },
-          { scale: 1, opacity: 1, duration: 0.3, ease: "power2.out" }
-        );
-      }
     }
 
     hideButton() {
