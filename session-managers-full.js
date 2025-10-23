@@ -1076,6 +1076,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!this.jumpButton) return;
       
       this.setupButton();
+      this.showButton(); // Show immediately
       this.updateButtonVisibility();
       this.startPeriodicUpdates();
     }
@@ -1093,7 +1094,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const offset = parseInt(this.jumpButton.getAttribute('data-jump-to-live')) || 0;
       const offsetPx = offset * 16; // convert rem to px
 
-      // Использовать GSAP для скролла (как в рабочем коде)
+      // Use GSAP for scrolling (like in working code)
       if (typeof gsap !== 'undefined') {
         gsap.to(window, { 
           duration: 1, 
@@ -1101,13 +1102,13 @@ document.addEventListener("DOMContentLoaded", function () {
           ease: "power2.out" 
         });
       } else {
-        // Fallback для случая, если GSAP не загружен
+        // Fallback for case when GSAP is not loaded
         firstLiveSession.scrollIntoView({ 
           behavior: 'smooth',
           block: 'start'
         });
         
-        // Добавить отступ после скролла
+        // Add offset after scroll
         setTimeout(() => {
           window.scrollBy(0, -offsetPx);
         }, 500);
@@ -1118,7 +1119,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const allSessions = document.querySelectorAll('[data-agenda-item]');
       const nowUtc = Date.now();
 
-      // Сначала найти все live сессии
+      // First find all live sessions
       const liveSessions = [];
       for (let session of allSessions) {
         const startUtc = this.parseToUtcTimestamp(session.getAttribute("data-start-time"));
@@ -1129,7 +1130,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       }
 
-      // Затем найти первую видимую live сессию
+      // Then find first visible live session
       for (let session of liveSessions) {
         const rect = session.getBoundingClientRect();
         const isVisible = rect.height > 0 && rect.width > 0 && 
@@ -1152,14 +1153,50 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!this.jumpButton) return;
       
       const hasLiveSessions = this.getFirstLiveSession() !== null;
-      this.jumpButton.style.display = hasLiveSessions ? '' : 'none';
+      
+      if (hasLiveSessions) {
+        this.showButton();
+      } else {
+        this.hideButton();
+      }
+    }
+
+    showButton() {
+      if (!this.jumpButton) return;
+      
+      this.jumpButton.style.display = '';
+      
+      if (typeof gsap !== 'undefined') {
+        gsap.fromTo(this.jumpButton, 
+          { scale: 0, opacity: 0 },
+          { scale: 1, opacity: 1, duration: 0.3, ease: "power2.out" }
+        );
+      }
+    }
+
+    hideButton() {
+      if (!this.jumpButton) return;
+      
+      if (typeof gsap !== 'undefined') {
+        gsap.to(this.jumpButton, {
+          scale: 0, 
+          opacity: 0, 
+          duration: 0.3, 
+          ease: "power2.in",
+          onComplete: () => {
+            this.jumpButton.style.display = 'none';
+          }
+        });
+      } else {
+        this.jumpButton.style.display = 'none';
+      }
     }
 
     startPeriodicUpdates() {
-      // Обновлять чаще для более быстрого отклика
+      // Update more frequently for faster response
       setInterval(() => {
         this.updateButtonVisibility();
-      }, 5000); // каждые 5 секунд вместо 30
+      }, 5000); // every 5 seconds instead of 30
     }
   }
 
