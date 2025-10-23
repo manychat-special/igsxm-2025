@@ -1223,4 +1223,38 @@ document.addEventListener("DOMContentLoaded", function () {
   window.feedbackManager=new FeedbackManager();
   window.startCountdownManager=new StartCountdownManager();
   window.jumpToLiveManager=new JumpToLiveManager();
+
+  /*───────────────────────────────
+   * Replay Sessions Manager (Simple)
+   *───────────────────────────────*/
+  class ReplaySessionsManager {
+    constructor() {
+      this.init();
+    }
+
+    init() {
+      this.updateReplaySessions();
+      setInterval(() => this.updateReplaySessions(), 30000);
+    }
+
+    updateReplaySessions() {
+      // Check if we're on replay page
+      if (!document.querySelector('[data-replay-sessions]')) {
+        return;
+      }
+      
+      const allSessions = document.querySelectorAll('[data-agenda-item]');
+      
+      allSessions.forEach(session => {
+        // Use existing SessionVisibilityManager to get state
+        const state = window.sessionManager ? window.sessionManager.getCurrentState(session) : null;
+        
+        // Show only sessions in "after" state
+        session.style.display = state === 'after' ? '' : 'none';
+      });
+    }
+  }
+
+  // Initialize replay manager
+  window.replayManager = new ReplaySessionsManager();
 });
