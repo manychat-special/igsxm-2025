@@ -1225,7 +1225,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     init() {
-      this.updateReplaySessions();
+      // Wait for SessionStateManager to initialize first
+      setTimeout(() => {
+        this.updateReplaySessions();
+      }, 1000);
+      
       setInterval(() => this.updateReplaySessions(), 30000);
     }
 
