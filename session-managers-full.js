@@ -1248,10 +1248,10 @@ document.addEventListener("DOMContentLoaded", function () {
         
         // Show only sessions in "after" state
         if (state === 'after') {
-          session.style.display = '';
+          session.classList.remove('hide');
           visibleSessions.push(session);
         } else {
-          session.style.display = 'none';
+          session.classList.add('hide');
         }
       });
       
@@ -1264,7 +1264,11 @@ document.addEventListener("DOMContentLoaded", function () {
         );
         
         // Hide the entire day section if no visible sessions
-        daySection.style.display = hasVisibleSessions ? '' : 'none';
+        if (hasVisibleSessions) {
+          daySection.classList.remove('hide');
+        } else {
+          daySection.classList.add('hide');
+        }
       });
     }
   }
