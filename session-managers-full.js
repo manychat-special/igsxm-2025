@@ -1078,6 +1078,13 @@ document.addEventListener("DOMContentLoaded", function () {
       this.setupButton();
       this.updateButtonVisibility();
       this.startPeriodicUpdates();
+      
+      // Обновлять при изменении видимости страницы
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) {
+          this.updateButtonVisibility();
+        }
+      });
     }
 
     setupButton() {
@@ -1155,9 +1162,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     startPeriodicUpdates() {
+      // Обновлять чаще для более быстрого отклика
       setInterval(() => {
         this.updateButtonVisibility();
-      }, CONFIG.checkInterval);
+      }, 5000); // каждые 5 секунд вместо 30
     }
   }
 
