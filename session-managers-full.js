@@ -618,9 +618,9 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   /*───────────────────────────────
-   * Nested Collections Manager (data-agenda-next)
+   * Session State Manager (manages all sessions + nested collections)
    *───────────────────────────────*/
-  class NestedCollectionsManager{
+  class SessionStateManager{
     constructor(){
       this.sessions=[];
       this.updateInterval=null;
@@ -1219,7 +1219,7 @@ document.addEventListener("DOMContentLoaded", function () {
   // Initialize overlay managers
   window.nextSessionOverlayManager=new NextSessionOverlayManager();
   window.additionalSessionOverlayManager=new AdditionalSessionOverlayManager();
-  window.nestedCollectionsManager=new NestedCollectionsManager();
+  window.sessionStateManager=new SessionStateManager();
   window.feedbackManager=new FeedbackManager();
   window.startCountdownManager=new StartCountdownManager();
   window.jumpToLiveManager=new JumpToLiveManager();
@@ -1246,8 +1246,8 @@ document.addEventListener("DOMContentLoaded", function () {
       const allSessions = document.querySelectorAll('[data-agenda-item]');
       
       allSessions.forEach(session => {
-        // Use existing SessionVisibilityManager to get state
-        const state = window.sessionManager ? window.sessionManager.getCurrentState(session) : null;
+        // Use existing SessionStateManager to get state
+        const state = window.sessionStateManager ? window.sessionStateManager.getCurrentState(session) : null;
         
         // Show only sessions in "after" state
         session.style.display = state === 'after' ? '' : 'none';
