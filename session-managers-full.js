@@ -1078,13 +1078,6 @@ document.addEventListener("DOMContentLoaded", function () {
       this.setupButton();
       this.updateButtonVisibility();
       this.startPeriodicUpdates();
-      
-      // Обновлять при изменении видимости страницы
-      document.addEventListener("visibilitychange", () => {
-        if (!document.hidden) {
-          this.updateButtonVisibility();
-        }
-      });
     }
 
     setupButton() {
@@ -1125,25 +1118,22 @@ document.addEventListener("DOMContentLoaded", function () {
       const allSessions = document.querySelectorAll('[data-agenda-item]');
       const nowUtc = Date.now();
 
-      // Найти все live сессии по времени
-      const liveSessions = Array.from(allSessions)
-        .map(s => ({
-          el: s,
-          startUtc: this.parseToUtcTimestamp(s.getAttribute("data-start-time")),
-          endUtc: this.parseToUtcTimestamp(s.getAttribute("data-end-time"))
-        }))
-        .filter(x => x.startUtc != null && x.endUtc != null && x.startUtc <= nowUtc && nowUtc < x.endUtc)
-        .sort((a, b) => a.startUtc - b.startUtc);
-
-      // Найти первую ВИДИМУЮ live сессию
-      for (let session of liveSessions) {
-        const rect = session.el.getBoundingClientRect();
-        const isVisible = rect.height > 0 && rect.width > 0 && 
-                         window.getComputedStyle(session.el).display !== 'none' &&
-                         window.getComputedStyle(session.el).visibility !== 'hidden';
+      // Найти первую видимую live сессию
+      for (let session of allSessions) {
+        const startUtc = this.parseToUtcTimestamp(session.getAttribute("data-start-time"));
+        const endUtc = this.parseToUtcTimestamp(session.getAttribute("data-end-time"));
         
-        if (isVisible) {
-          return session.el;
+        // Проверяем, что сессия live по времени
+        if (startUtc && endUtc && startUtc <= nowUtc && nowUtc < endUtc) {
+          // Проверяем, что сессия видима
+          const rect = session.getBoundingClientRect();
+          const isVisible = rect.height > 0 && rect.width > 0 && 
+                           window.getComputedStyle(session).display !== 'none' &&
+                           window.getComputedStyle(session).visibility !== 'hidden';
+          
+          if (isVisible) {
+            return session;
+          }
         }
       }
 
