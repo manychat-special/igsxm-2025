@@ -1093,16 +1093,25 @@ document.addEventListener("DOMContentLoaded", function () {
       const offset = parseInt(this.jumpButton.getAttribute('data-jump-to-live')) || 0;
       const offsetPx = offset * 16; // convert rem to px
 
-      // Получить позицию элемента относительно документа
-      const rect = firstLiveSession.getBoundingClientRect();
-      const elementTop = rect.top + window.pageYOffset;
-      const targetPosition = elementTop - offsetPx;
-
-      // Плавно скроллить к позиции
-      window.scrollTo({
-        top: Math.max(0, targetPosition),
-        behavior: 'smooth'
-      });
+      // Использовать GSAP для скролла (как в рабочем коде)
+      if (typeof gsap !== 'undefined') {
+        gsap.to(window, { 
+          duration: 1, 
+          scrollTo: { y: firstLiveSession, offsetY: offsetPx }, 
+          ease: "power2.out" 
+        });
+      } else {
+        // Fallback для случая, если GSAP не загружен
+        firstLiveSession.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        });
+        
+        // Добавить отступ после скролла
+        setTimeout(() => {
+          window.scrollBy(0, -offsetPx);
+        }, 500);
+      }
     }
 
     getFirstLiveSession() {
