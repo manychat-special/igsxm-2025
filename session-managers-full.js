@@ -1093,8 +1093,9 @@ document.addEventListener("DOMContentLoaded", function () {
       const offset = parseInt(this.jumpButton.getAttribute('data-jump-to-live')) || 0;
       const offsetPx = offset * 16; // convert rem to px
 
-      // Получить позицию элемента
-      const elementTop = firstLiveSession.offsetTop;
+      // Получить позицию элемента относительно документа
+      const rect = firstLiveSession.getBoundingClientRect();
+      const elementTop = rect.top + window.pageYOffset;
       const targetPosition = elementTop - offsetPx;
 
       // Плавно скроллить к позиции
