@@ -1093,15 +1093,15 @@ document.addEventListener("DOMContentLoaded", function () {
       const offset = parseInt(this.jumpButton.getAttribute('data-jump-to-live')) || 0;
       const offsetPx = offset * 16; // convert rem to px
 
-      firstLiveSession.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'start'
-      });
+      // Получить позицию элемента
+      const elementTop = firstLiveSession.offsetTop;
+      const targetPosition = elementTop - offsetPx;
 
-      // Добавить отступ от верха
-      setTimeout(() => {
-        window.scrollBy(0, -offsetPx);
-      }, 100);
+      // Плавно скроллить к позиции
+      window.scrollTo({
+        top: Math.max(0, targetPosition),
+        behavior: 'smooth'
+      });
     }
 
     getFirstLiveSession() {
