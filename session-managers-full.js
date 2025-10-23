@@ -1240,35 +1240,13 @@ document.addEventListener("DOMContentLoaded", function () {
       }
       
       const allSessions = document.querySelectorAll('[data-agenda-item]');
-      const visibleSessions = [];
       
       allSessions.forEach(session => {
         // Use existing SessionStateManager to get state
         const state = window.sessionStateManager ? window.sessionStateManager.getCurrentState(session) : null;
         
         // Show only sessions in "after" state
-        if (state === 'after') {
-          session.classList.remove('hide');
-          visibleSessions.push(session);
-        } else {
-          session.classList.add('hide');
-        }
-      });
-      
-      // Hide day sections that have no visible sessions
-      const daySections = document.querySelectorAll('[data-day-section="day1"], [data-day-section="day2"]');
-      daySections.forEach(daySection => {
-        const sessionsInSection = daySection.querySelectorAll('[data-agenda-item]');
-        const hasVisibleSessions = Array.from(sessionsInSection).some(session => 
-          visibleSessions.includes(session)
-        );
-        
-        // Hide the entire day section if no visible sessions
-        if (hasVisibleSessions) {
-          daySection.classList.remove('hide');
-        } else {
-          daySection.classList.add('hide');
-        }
+        session.style.display = state === 'after' ? '' : 'none';
       });
     }
   }
