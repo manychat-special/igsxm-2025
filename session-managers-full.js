@@ -1067,17 +1067,10 @@ document.addEventListener("DOMContentLoaded", function () {
    *───────────────────────────────*/
   class JumpToLiveManager {
     constructor() {
-      this.jumpButton = null;
-      this.init();
-    }
-
-    init() {
       this.jumpButton = document.querySelector('[data-jump-to-live]');
       if (!this.jumpButton) return;
       
       this.setupButton();
-      this.updateButtonVisibility(); // Check and show/hide based on live sessions
-      this.startPeriodicUpdates();
     }
 
     setupButton() {
@@ -1088,12 +1081,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     jumpToFirstLive() {
       const firstLiveSession = this.getFirstLiveSession();
-      if (!firstLiveSession) return;
+      if (!firstLiveSession) {
+        this.shakeButton();
+        return;
+      }
 
       const offset = parseInt(this.jumpButton.getAttribute('data-jump-to-live')) || 0;
-      const offsetPx = offset * 16; // convert rem to px
+      const offsetPx = offset * 16;
 
-      // Use GSAP for scrolling (like in working code)
       if (typeof gsap !== 'undefined') {
         gsap.to(window, { 
           duration: 1, 
@@ -1101,13 +1096,10 @@ document.addEventListener("DOMContentLoaded", function () {
           ease: "power2.out" 
         });
       } else {
-        // Fallback for case when GSAP is not loaded
         firstLiveSession.scrollIntoView({ 
           behavior: 'smooth',
           block: 'start'
         });
-        
-        // Add offset after scroll
         setTimeout(() => {
           window.scrollBy(0, -offsetPx);
         }, 500);
@@ -1118,76 +1110,39 @@ document.addEventListener("DOMContentLoaded", function () {
       const allSessions = document.querySelectorAll('[data-agenda-item]');
       const nowUtc = Date.now();
 
-      // First find all live sessions
-      const liveSessions = [];
       for (let session of allSessions) {
-        const startUtc = this.parseToUtcTimestamp(session.getAttribute("data-start-time"));
-        const endUtc = this.parseToUtcTimestamp(session.getAttribute("data-end-time"));
+        const startUtc = parseToUtcTimestamp(session.getAttribute("data-start-time"));
+        const endUtc = parseToUtcTimestamp(session.getAttribute("data-end-time"));
         
         if (startUtc && endUtc && startUtc <= nowUtc && nowUtc < endUtc) {
-          liveSessions.push(session);
-        }
-      }
-
-      // Then find first visible live session
-      for (let session of liveSessions) {
-        const rect = session.getBoundingClientRect();
-        const isVisible = rect.height > 0 && rect.width > 0 && 
-                         window.getComputedStyle(session).display !== 'none' &&
-                         window.getComputedStyle(session).visibility !== 'hidden';
-        
-        if (isVisible) {
-          return session;
+          const rect = session.getBoundingClientRect();
+          const isVisible = rect.height > 0 && rect.width > 0 && 
+                           window.getComputedStyle(session).display !== 'none' &&
+                           window.getComputedStyle(session).visibility !== 'hidden';
+          
+          if (isVisible) {
+            return session;
+          }
         }
       }
 
       return null;
     }
 
-    parseToUtcTimestamp(timeStr) {
-      return parseToUtcTimestamp(timeStr);
-    }
 
-    updateButtonVisibility() {
-      if (!this.jumpButton) return;
+    shakeButton() {
+      if (typeof gsap === 'undefined') return;
       
-      const hasLiveSessions = this.getFirstLiveSession() !== null;
-      
-      if (!hasLiveSessions) {
-        this.hideButton();
-      }
-      // If has live sessions, do nothing - button is already visible in HTML
-    }
-
-    showButton() {
-      if (!this.jumpButton) return;
-      
-      this.jumpButton.classList.remove('hide');
-    }
-
-    hideButton() {
-      if (!this.jumpButton) return;
-      
-      if (typeof gsap !== 'undefined') {
-        gsap.to(this.jumpButton, {
-          scale: 0, 
-          opacity: 0, 
-          duration: 0.3, 
-          ease: "power2.in",
-          onComplete: () => {
-            this.jumpButton.classList.add('hide');
-          }
-        });
-      } else {
-        this.jumpButton.classList.add('hide');
-      }
-    }
-
-    startPeriodicUpdates() {
-      // Update more frequently for faster response
-      setInterval(() => {
-        this.updateButtonVisibility();
-      }, 5000); // every 5 seconds instead of 30
+      gsap.to(this.jumpButton, {
+        x: -10,
+        duration: 0.1,
+        ease: "power2.out",
+        yoyo: true,
+        repeat: 5,
+        onComplete: () => {
+          gsap.set(this.jumpButton, { x: 0 });
+        }
+      });
     }
   }
 
