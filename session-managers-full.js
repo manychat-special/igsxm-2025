@@ -1063,6 +1063,79 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   /*───────────────────────────────
+   * Jump to Live Session Manager
+   *───────────────────────────────*/
+  class JumpToLiveManager {
+    constructor() {
+      this.jumpButton = null;
+      this.init();
+    }
+
+    init() {
+      this.jumpButton = document.querySelector('[data-jump-to-live]');
+      if (!this.jumpButton) return;
+      
+      this.setupButton();
+      this.updateButtonVisibility();
+      this.startPeriodicUpdates();
+    }
+
+    setupButton() {
+      this.jumpButton.addEventListener('click', () => {
+        this.jumpToFirstLive();
+      });
+    }
+
+    jumpToFirstLive() {
+      const firstLiveSession = this.getFirstLiveSession();
+      if (!firstLiveSession) return;
+
+      const offset = parseInt(this.jumpButton.getAttribute('data-jump-to-live')) || 0;
+      const offsetPx = offset * 16; // convert rem to px
+
+      firstLiveSession.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+
+      // Добавить отступ от верха
+      setTimeout(() => {
+        window.scrollBy(0, -offsetPx);
+      }, 100);
+    }
+
+    getFirstLiveSession() {
+      const allSessions = document.querySelectorAll('[data-agenda-item]');
+      const nowUtc = Date.now();
+
+      const liveSessions = Array.from(allSessions)
+        .map(s => ({
+          el: s,
+          startUtc: parseToUtcTimestamp(s.getAttribute("data-start-time")),
+          endUtc: parseToUtcTimestamp(s.getAttribute("data-end-time"))
+        }))
+        .filter(x => x.startUtc != null && x.endUtc != null && x.startUtc <= nowUtc && nowUtc < x.endUtc)
+        .sort((a, b) => a.startUtc - b.startUtc)
+        .map(x => x.el);
+
+      return liveSessions[0] || null;
+    }
+
+    updateButtonVisibility() {
+      if (!this.jumpButton) return;
+      
+      const hasLiveSessions = this.getFirstLiveSession() !== null;
+      this.jumpButton.style.display = hasLiveSessions ? '' : 'none';
+    }
+
+    startPeriodicUpdates() {
+      setInterval(() => {
+        this.updateButtonVisibility();
+      }, CONFIG.checkInterval);
+    }
+  }
+
+  /*───────────────────────────────
    * Feedback Manager (data-session-feedback)
    *───────────────────────────────*/
   class FeedbackManager {
@@ -1138,4 +1211,5 @@ document.addEventListener("DOMContentLoaded", function () {
   window.nestedCollectionsManager=new NestedCollectionsManager();
   window.feedbackManager=new FeedbackManager();
   window.startCountdownManager=new StartCountdownManager();
+  window.jumpToLiveManager=new JumpToLiveManager();
 });
