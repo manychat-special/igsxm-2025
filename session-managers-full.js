@@ -1108,6 +1108,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const allSessions = document.querySelectorAll('[data-agenda-item]');
       const nowUtc = Date.now();
 
+      // Найти все live сессии по времени
       const liveSessions = Array.from(allSessions)
         .map(s => ({
           el: s,
@@ -1115,10 +1116,10 @@ document.addEventListener("DOMContentLoaded", function () {
           endUtc: parseToUtcTimestamp(s.getAttribute("data-end-time"))
         }))
         .filter(x => x.startUtc != null && x.endUtc != null && x.startUtc <= nowUtc && nowUtc < x.endUtc)
-        .sort((a, b) => a.startUtc - b.startUtc)
-        .map(x => x.el);
+        .sort((a, b) => a.startUtc - b.startUtc);
 
-      return liveSessions[0] || null;
+      // Вернуть первую live сессию
+      return liveSessions.length > 0 ? liveSessions[0].el : null;
     }
 
     updateButtonVisibility() {
