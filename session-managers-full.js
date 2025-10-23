@@ -1118,7 +1118,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const allSessions = document.querySelectorAll('[data-agenda-item]');
       const nowUtc = Date.now();
 
-      // Найти все live сессии по времени (используем ту же логику что и LiveSessionsManager)
+      // Найти все live сессии по времени
       const liveSessions = Array.from(allSessions)
         .map(s => ({
           el: s,
@@ -1128,8 +1128,19 @@ document.addEventListener("DOMContentLoaded", function () {
         .filter(x => x.startUtc != null && x.endUtc != null && x.startUtc <= nowUtc && nowUtc < x.endUtc)
         .sort((a, b) => a.startUtc - b.startUtc);
 
-      // Вернуть первую live сессию
-      return liveSessions.length > 0 ? liveSessions[0].el : null;
+      // Найти первую ВИДИМУЮ live сессию
+      for (let session of liveSessions) {
+        const rect = session.el.getBoundingClientRect();
+        const isVisible = rect.height > 0 && rect.width > 0 && 
+                         window.getComputedStyle(session.el).display !== 'none' &&
+                         window.getComputedStyle(session.el).visibility !== 'hidden';
+        
+        if (isVisible) {
+          return session.el;
+        }
+      }
+
+      return null;
     }
 
     parseToUtcTimestamp(timeStr) {
