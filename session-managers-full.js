@@ -1118,22 +1118,26 @@ document.addEventListener("DOMContentLoaded", function () {
       const allSessions = document.querySelectorAll('[data-agenda-item]');
       const nowUtc = Date.now();
 
-      // Найти первую видимую live сессию
+      // Сначала найти все live сессии
+      const liveSessions = [];
       for (let session of allSessions) {
         const startUtc = this.parseToUtcTimestamp(session.getAttribute("data-start-time"));
         const endUtc = this.parseToUtcTimestamp(session.getAttribute("data-end-time"));
         
-        // Проверяем, что сессия live по времени
         if (startUtc && endUtc && startUtc <= nowUtc && nowUtc < endUtc) {
-          // Проверяем, что сессия видима
-          const rect = session.getBoundingClientRect();
-          const isVisible = rect.height > 0 && rect.width > 0 && 
-                           window.getComputedStyle(session).display !== 'none' &&
-                           window.getComputedStyle(session).visibility !== 'hidden';
-          
-          if (isVisible) {
-            return session;
-          }
+          liveSessions.push(session);
+        }
+      }
+
+      // Затем найти первую видимую live сессию
+      for (let session of liveSessions) {
+        const rect = session.getBoundingClientRect();
+        const isVisible = rect.height > 0 && rect.width > 0 && 
+                         window.getComputedStyle(session).display !== 'none' &&
+                         window.getComputedStyle(session).visibility !== 'hidden';
+        
+        if (isVisible) {
+          return session;
         }
       }
 
