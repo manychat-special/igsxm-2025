@@ -1242,11 +1242,34 @@ document.addEventListener("DOMContentLoaded", function () {
       const allSessions = document.querySelectorAll('[data-agenda-item]');
       
       allSessions.forEach(session => {
-        // Use existing SessionStateManager to get state
-        const state = window.sessionStateManager ? window.sessionStateManager.getCurrentState(session) : null;
+        // Check if session has data-after-session elements with delay
+        const afterElements = session.querySelectorAll('[data-after-session]');
+        let shouldShow = false;
         
-        // Show only sessions in "after" state
-        session.style.display = state === 'after' ? '' : 'none';
+        // Check if any data-after-session elements should be visible (with delay)
+        shouldShow = Array.from(afterElements).some(el => {
+          const afterOffset = el.getAttribute('data-after-session');
+          const afterMinutes = afterOffset ? parseInt(afterOffset) : 0;
+          const startTime = session.getAttribute('data-start-time');
+          const endTime = session.getAttribute('data-end-time');
+          
+          if (!startTime || !endTime) return false;
+          
+          const sessionEnd = window.parseAsPDT ? window.parseAsPDT(endTime) : new Date(endTime);
+          const now = new Date();
+          
+          if (afterMinutes > 0) {
+            // Show after specified delay
+            const afterTime = new Date(sessionEnd.getTime() + (afterMinutes * 60 * 1000));
+            return now >= afterTime;
+          } else {
+            // Show immediately after session ends
+            return now > sessionEnd;
+          }
+        });
+        
+        // Show only sessions that should be visible
+        session.style.display = shouldShow ? '' : 'none';
       });
     }
   }
